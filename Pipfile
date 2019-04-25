@@ -9,6 +9,8 @@ verify_ssl = true
 click = "*"
 python-twitter = "*"
 colorama = "*"
+flask = "*"
+sqlalchemy = "*"
 
 [requires]
 python_version = "3.7"

@@ -29,6 +29,8 @@ setuptools.setup(
     install_requires=[
         'click',
         'colorama',
-        'python-twitter'
+        'python-twitter',
+        'flask',
+        'sqlalchemy'
     ]
 )

@@ -3,37 +3,28 @@ import sys
 import click
 import twitter
 
+from .web import create_app
+
 version = '0.1'
 
 
-def validate_environment():
-    required_vars = [
-        'TWITTER_API_KEY',
-        'TWITTER_API_SECRET',
-        'TWITTER_ACCESS_TOKEN_KEY',
-        'TWITTER_ACCESS_TOKEN_SECRET'
-    ]
-    found = True
-    for var in required_vars:
-        if var not in os.environ:
-            found = False
-    return found
-
-
 @click.command()
-@click.argument('username')
-def main(username):
+@click.option('--configure', is_flag=True, help='Start the web server to configure ephemeral')
+@click.option('--debug', is_flag=True, help='Start web server in debug mode')
+def main(configure, debug):
     click.echo(click.style("ephemeral {}".format(version), fg='yellow'))
 
-    # Make sure environment variables are set
-    if not validate_environment():
-        click.echo(click.style("These environment variables must be exist:", fg='red'))
-        click.echo(click.style("TWITTER_API_KEY", fg='red'))
-        click.echo(click.style("TWITTER_API_SECRET", fg='red'))
-        click.echo(click.style("TWITTER_ACCESS_TOKEN_KEY", fg='red'))
-        click.echo(click.style("TWITTER_ACCESS_TOKEN_SECRET", fg='red'))
-        sys.exit(1)
+    if configure:
+        click.echo('Load this website in a browser to configure ephemeral')
+        click.echo('')
+        app = create_app()
+        app.run(host='127.0.0.1', port=8080, debug=debug)
 
+    else:
+        click.echo('Only --configure is implemented so far')
+
+
+    """
     # Authenticate to the twitter API
     api = twitter.Api(consumer_key=os.environ['TWITTER_API_KEY'],
         consumer_secret=os.environ['TWITTER_API_SECRET'],
@@ -43,3 +34,4 @@ def main(username):
     # Get the user
     user = api.GetUser(screen_name=username)
     print(user)
+    """
