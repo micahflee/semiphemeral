@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <div class="sidebar">
+    <ul>
+      <li><a href="{{ url_for('index') }}">how it works</a></li>
+      <li><a href="{{ url_for('settings') }}">settings</a></li>
+      <li><a href="{{ url_for('exceptions') }}">exceptions</a></li>
+    </ul>
+  </div>
+  <div class="content">
+    <h1>{% block header_text %}{% endblock %}</h1>
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
