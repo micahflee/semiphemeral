@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 click = "*"
 python-twitter = "*"
+colorama = "*"
 
 [requires]
 python_version = "3.7"
