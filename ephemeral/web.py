@@ -1,7 +1,9 @@
 from flask import Flask, render_template
 
+from .db import Tweet
 
-def create_app():
+
+def create_app(settings, session):
     app = Flask(__name__)
 
     @app.route("/")

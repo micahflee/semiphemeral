@@ -19,6 +19,6 @@
 
 <p>The Twitter API rate limits a lot, and when ephemeral hits a rate limit, it will simply wait until it can continue using the API. For this reason, you should run the command once and wait for it to finish the first time &mdash; it may take a very long time if you have a lot of old tweets. Then set it to run automatically as a cron job to delete your old tweets going forward. (Ephemeral will always fetch tweets before deleting old ones.)</p>
 
-<p>All settings, exceptions, and tweets (including deleted ones) are stored in a sqlite database in your home directory called <code>~/.ephemeral.db</code>.</p>
+<p>Settings are stored in <code>~/.ephemeral/settings.json</code>. All tweets (including exceptions, and deleted tweets) are stored in a sqlite database <code>~/.ephemeral/tweets.db</code>.</p>
 
 {% endblock %}
