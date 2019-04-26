@@ -3,6 +3,69 @@
 {% block header_text %}Ephemeral Settings{% endblock %}
 {% block content %}
 
-<p>Settings content here</p>
+<form method="post" action="{{ url_for('edit_settings') }}">
+
+  <h3>Twitter settings</h3>
+
+  <p>See <a href="https://python-twitter.readthedocs.io/en/latest/getting_started.html">here</a> for documentation on how to get these Twitter API credentials.</p>
+
+  <ul>
+    <li>
+      <label for="api_key">API key</label>
+      <input type="text" name="api_key" value="{{ api_key }}" \>
+    </li>
+    <li>
+      <label for="api_secret">API secret</label>
+      <input type="text" name="api_secret" value="{{ api_secret }}" \>
+    </li>
+    <li>
+      <label for="access_token_key">Access token key</label>
+      <input type="text" name="access_token_key" value="{{ access_token_key }}" \>
+    </li>
+    <li>
+      <label for="access_token_secret">Access token secret</label>
+      <input type="text" name="access_token_secret" value="{{ access_token_secret }}" \>
+    </li>
+    <li>
+      <label for="username">Twitter username</label>
+      <input type="text" name="username" value="{{ username }}" \>
+    </li>
+  </ul>
+
+  <h3>Automatically exlude deleting tweets</h3>
+
+  <ul>
+    <li>
+      Newer than
+      <input class="small" type="text" name="days_threshold" value="{{ days_threshold }}" \>
+      days
+    </li>
+    <li>
+      With over
+      <input class="small" type="text" name="retweet_threshold" value="{{ retweet_threshold }}" \>
+      retweets
+    </li>
+    <li>
+      With over
+      <input class="small" type="text" name="like_threshold" value="{{ like_threshold }}" \>
+      likes
+    </li>
+    <li>
+      <label class="checkbox">
+        <input type="checkbox" name="threads_threshold" {% if threads_threshold %}checked="checked"{% endif %} />
+        Don't delete tweets that are part of a thread that at at least one tweet that meets my retweet or like thresholds
+      </label>
+    </li>
+    <li>
+      <label class="checkbox">
+        <input type="checkbox" name="exclude_keybase_proof" {% if exclude_keybase_proof %}checked="checked"{% endif %} />
+        Don't delete Keybase proofs
+      </label>
+    </li>
+  </ul>
+
+  <p><input type="submit" value="Save" /></p>
+
+</form>
 
 {% endblock %}

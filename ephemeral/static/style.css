@@ -16,10 +16,8 @@ body {
 
 .sidebar ul {
   list-style: none;
-  header ul li
   margin: 0;
   padding: 0;
-  float: right;
 }
 
 .sidebar ul li {
@@ -46,4 +44,34 @@ body {
 
 .content a {
   color: #444d93;
+}
+
+form ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+form ul li {
+  margin-bottom: 1em;
+}
+
+form label {
+  display: inline-block;
+  width: 12em;
+  text-align: right;
+}
+
+form label.checkbox {
+  display: inline;
+  width: auto;
+  text-align: left;
+}
+
+form input[type="text"] {
+  width: 500px;
+}
+
+form input.small {
+  width: 50px;
 }
