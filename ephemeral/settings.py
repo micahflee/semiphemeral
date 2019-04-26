@@ -30,9 +30,9 @@ class Settings(object):
             with open(self.filename, 'r') as f:
                 self.settings = json.load(f)
 
-            for key, val in self.default_settings:
+            for key in self.default_settings:
                 if key not in self.settings:
-                    self.set(key, val)
+                    self.set(key, self.default_settings[key])
         else:
             self.settings = self.default_settings.copy()
 
