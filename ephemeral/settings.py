@@ -39,3 +39,12 @@ class Settings(object):
     def save(self):
         with open(self.filename, 'w') as f:
             json.dump(self.settings, f)
+
+    def is_configured(self):
+        if self.get('api_key') == '' or \
+            self.get('api_secret') == '' or \
+            self.get('access_token_key') == '' or \
+            self.get('access_token_secret') == '' or \
+            self.get('username') == '':
+            return False
+        return True

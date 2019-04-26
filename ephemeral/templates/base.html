@@ -12,6 +12,10 @@
       <li><a href="{{ url_for('edit_settings') }}">settings</a></li>
       <li><a href="{{ url_for('exceptions') }}">exceptions</a></li>
     </ul>
+
+    {% if not is_configured %}
+    <p>The Twitter API is not configured yet</p>
+    {% endif %}
   </div>
   <div class="content">
     <h1>{% block header_text %}{% endblock %}</h1>

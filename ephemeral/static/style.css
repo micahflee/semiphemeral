@@ -10,8 +10,10 @@ body {
   top: 0;
   left: 0;
   background-color: #111111;
+  color: #ffffff;
   overflow-x: hidden;
   padding-top: 20px;
+  padding: 10px;
 }
 
 .sidebar ul {
@@ -34,7 +36,7 @@ body {
 }
 
 .content {
-  margin-left: 160px;
+  margin-left: 180px;
   padding: 0px 10px;
 }
 
