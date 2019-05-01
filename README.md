@@ -1,25 +1,8 @@
-# ephemeral
+# Semiphemeral
 
-Delete old tweets based on specific criteria
+_This project is a work in progress. It not ready to use yet._
 
-## Twitter API credentials
-
-To use this tool, the following environment variables need to exist:
-
-```
-TWITTER_API_KEY
-TWITTER_API_SECRET
-TWITTER_ACCESS_TOKEN_KEY
-TWITTER_ACCESS_TOKEN_SECRET
-```
-
-See [here](https://python-twitter.readthedocs.io/en/latest/getting_started.html) for some documentation on how to get these values from Twitter.
-
-## Usage
-
-```
-ephemeral USERNAME
-```
+There are plenty of tools that let you make your Twitter feed ephemeral, automatically deleting tweets older than some threshold, like one month. Semiphemeral does this, but also lets you automatically exclude tweets based on criteria: how many RTs or likes they have, and if they're part of a thread where one of your tweets has that many RTs or likes. It also lets you manually select tweets you'd like to exclude from deleting.
 
 ## Development
 
@@ -32,5 +15,5 @@ pipenv install --dev
 And run the program like this:
 
 ```sh
-pipenv run python -c 'import ephemeral; ephemeral.main()'
+pipenv run python ./app.py --help
 ```
