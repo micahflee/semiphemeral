@@ -19,7 +19,7 @@ setuptools.setup(
         "Development Status :: 2 - Pre-Alpha",
         "Environment :: Console",
         "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+        "License :: OSI Approved :: MIT License"
     ),
     entry_points={
         'console_scripts': [
