@@ -1,20 +1,20 @@
 import setuptools
-import ephemeral
+import semiphemeral
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="ephemeral",
-    version=ephemeral.version,
+    name="semiphemeral",
+    version=semiphemeral.version,
     author="Micah Lee",
     author_email="micah@micahflee.com",
-    description="delete old tweets based on specific criteria",
     long_description=long_description,
+    description="Automatically delete your old tweets, except for the ones you want to keep",
     long_description_content_type="text/markdown",
     license="GPLv3+",
-    url="https://github.com/micahflee/ephemeral",
-    packages=['ephemeral'],
+    url="https://github.com/micahflee/semiphemeral",
+    packages=['semiphemeral'],
     classifiers=(
         "Development Status :: 2 - Pre-Alpha",
         "Environment :: Console",
@@ -23,7 +23,7 @@ setuptools.setup(
     ),
     entry_points={
         'console_scripts': [
-            'ephemeral = ephemeral:main',
+            'semiphemeral = semiphemeral:main',
         ],
     },
     install_requires=[

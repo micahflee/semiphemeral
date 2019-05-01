@@ -10,20 +10,20 @@ version = '0.1'
 
 
 @click.command()
-@click.option('--configure', is_flag=True, help='Start the web server to configure ephemeral')
+@click.option('--configure', is_flag=True, help='Start the web server to configure semiphemeral')
 @click.option('--fetch', is_flag=True, help='Download all tweets')
 @click.option('--delete', is_flag=True, help='Delete tweets that aren\'t automatically or manually excluded')
 @click.option('--debug', is_flag=True, help='Start web server in debug mode')
 def main(configure, fetch, delete, debug):
-    click.echo(click.style("ephemeral {}".format(version), fg='yellow'))
+    click.echo(click.style("semiphemeral {}".format(version), fg='yellow'))
 
     # Initialize stuff
-    os.makedirs(os.path.expanduser('~/.ephemeral'), exist_ok=True)
-    settings = Settings(os.path.expanduser('~/.ephemeral/settings.json'))
-    session = create_db(os.path.expanduser('~/.ephemeral/tweets.db'))
+    os.makedirs(os.path.expanduser('~/.semiphemeral'), exist_ok=True)
+    settings = Settings(os.path.expanduser('~/.semiphemeral/settings.json'))
+    session = create_db(os.path.expanduser('~/.semiphemeral/tweets.db'))
 
     if configure:
-        click.echo('Load this website in a browser to configure ephemeral, and press Ctrl-C when done')
+        click.echo('Load this website in a browser to configure semiphemeral, and press Ctrl-C when done')
         click.echo('http://127.0.0.1:8080')
         click.echo('')
         app = create_app(settings, session)
