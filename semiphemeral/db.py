@@ -12,21 +12,30 @@ class Tweet(Base):
     __tablename__ = 'tweets'
     id = Column(Integer, primary_key=True)
     created_at = Column(DateTime)
-    tweet_id = Column(Integer)
+    user_id = Column(Integer) # we download all threads too, including with other users
+    status_id = Column(Integer)
     lang = Column(String)
     source = Column(String)
     text = Column(String)
-    is_retweet = Column(Boolean)
+    in_reply_to_status_id = Column(Integer)
+    in_reply_to_user_id = Column(Integer)
+    retweeted = Column(Boolean)
+    favorited = Column(Boolean)
     is_deleted = Column(Boolean)
     exclude_from_delete = Column(Boolean)
 
     def __init__(self, api_data):
         self.create_at = datetime.strptime(api_data.created_at, '%a %b %d %H:%M:%S +0000 %Y')
+        self.user_id = api_data.user.id
         self.tweet_id = api_data.id
         self.lang = api_data.lang
         self.source = api_data.source
         self.text = api_data.text
-        self.is_retweet = api_data.retweeted
+        self.in_reply_to_tweet_id = api_data.in_reply_to_status_id
+        self.in_reply_to_user_id = api_data.in_reply_to_user_id
+        self.retweeted = api_data.retweeted
+        self.favorited = api_data.favorited
+
         self.is_deleted = False
         self.exclude_from_delete = False
 

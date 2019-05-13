@@ -7,10 +7,10 @@ verify_ssl = true
 
 [packages]
 click = "*"
-python-twitter = "*"
 colorama = "*"
 flask = "*"
 sqlalchemy = "*"
+tweepy = "*"
 
 [requires]
 python_version = "3.7"

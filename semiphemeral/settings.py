@@ -15,7 +15,8 @@ class Settings(object):
             'retweet_threshold': 100,
             'like_threshold': 100,
             'threads_threshold': True,
-            'exclude_keybase_proof': True
+            'exclude_keybase_proof': True,
+            'import_has_completed_once': False
         }
         self.load()
 
