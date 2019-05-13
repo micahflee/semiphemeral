@@ -16,7 +16,7 @@ class Settings(object):
             'like_threshold': 100,
             'threads_threshold': True,
             'exclude_keybase_proof': True,
-            'import_has_completed_once': False
+            'since_id': None
         }
         self.load()
 
