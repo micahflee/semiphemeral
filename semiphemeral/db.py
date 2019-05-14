@@ -58,18 +58,17 @@ class Tweet(Base):
         """
         tweet = session.query(Tweet).filter_by(status_id=self.status_id).first()
         if tweet:
-            click.secho('Tweet {} already in db'.format(self.status_id), dim=True)
+            click.secho('Skipped {} @{}, id={}'.format(
+                self.created_at.strftime('%Y-%m-%d'),
+                self.user_screen_name,
+                self.status_id), dim=True)
             return True
 
     def summarize(self):
-        click.echo('{} {} {} {}'.format(
-            click.style('{}'.format(self.created_at.strftime('%Y-%m-%d')), fg='cyan'),
-            click.style('@{}'.format(self.user_screen_name), fg='magenta'),
-            click.style('RTs={}, likes={}'.format(
-                self.retweet_count,
-                self.favorite_count), dim=True),
-            click.style(self.text.replace('\n', '\\n'))
-        ))
+        click.echo('Fetched {} @{}, id={}'.format(
+            self.created_at.strftime('%Y-%m-%d'),
+            self.user_screen_name,
+            self.status_id))
 
 
 def create_db(database_path):

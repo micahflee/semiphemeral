@@ -32,28 +32,29 @@ class Twitter(object):
         # See if we retrieve all tweets, or just tweets since the last fetch
         since_id = self.settings.get('since_id')
 
-        # Fetch tweets
-        count = 0
-        for status in tweepy.Cursor(
+        if since_id:
+            click.secho('Fetching all recent tweets', bold=True)
+        else:
+            click.secho('Fetching all tweets, this first run may take a long time', bold=True)
+
+        # Fetch tweets a page at a time
+        for page in tweepy.Cursor(
             self.api.user_timeline,
             id=self.settings.get('username'),
             since_id=since_id
-        ).items(20):
-            # Fetch the tweet
-            tweet = Tweet(status)
+        ).pages(1):
+            fetched_count = 0
 
-            # Skip tweets that are already in the database
-            if not tweet.already_saved(self.session):
-                tweet.summarize()
-                self.session.add(tweet)
+            # Import these tweets, and all their threads
+            for status in page:
+                fetched_count += self.import_tweet(Tweet(status))
 
-            # Only commit every 20 tweets
-            count += 1
-            if count % 20 == 0:
-                self.session.commit()
+                # Only commit every 20 tweets
+                if fetched_count % 20 == 0:
+                    self.session.commit()
 
-        # Commit the leftovers
-        self.session.commit()
+            # Commit the leftovers
+            self.session.commit()
 
         """
         # All done, update the since_id
@@ -64,6 +65,28 @@ class Twitter(object):
             self.settings.save()
         """
 
+    def import_tweet(self, tweet):
+        """
+        This imports a tweet, and recursively imports all tweets that it's in reply to,
+        and returns the number of tweets fetched
+        """
+        fetched_count = 0
+
+        if not tweet.already_saved(self.session):
+            tweet.summarize()
+            fetched_count += 1
+            self.session.add(tweet)
+
+        # Is this tweet a reply?
+        if tweet.in_reply_to_status_id:
+            # Do we already have the parent tweet?
+            parent_tweet = self.session.query(Tweet).filter_by(status_id=tweet.in_reply_to_status_id).first()
+            if not parent_tweet:
+                # If not, import it
+                status = self.api.get_status(tweet.in_reply_to_status_id)
+                fetched_count += self.import_tweet(Tweet(status))
+
+        return fetched_count
 
     def delete(self):
         if not self.authenticated:
