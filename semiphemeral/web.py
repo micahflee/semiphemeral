@@ -47,9 +47,20 @@ def create_app(settings, session):
             threads_threshold=settings.get('threads_threshold'),
             exclude_keybase_proof=settings.get('exclude_keybase_proof'))
 
-    @app.route("/exceptions")
-    def exceptions():
-        return render_template('exceptions.html',
-            is_configured=settings.is_configured())
+    @app.route("/tweets")
+    def tweets():
+        # Statistics
+        total_tweets = session.execute('SELECT COUNT(*) FROM tweets').first()[0]
+        deleted_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE is_deleted=1').first()[0]
+        excluded_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE exclude_from_delete=1').first()[0]
+        total_threads = session.execute('SELECT COUNT(*) FROM threads').first()[0]
+
+        return render_template('tweets.html',
+            is_configured=settings.is_configured(),
+            last_fetch=settings.get('last_fetch'),
+            total_tweets=total_tweets,
+            deleted_tweets=deleted_tweets,
+            excluded_tweets=excluded_tweets,
+            total_threads=total_threads)
 
     return app

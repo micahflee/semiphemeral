@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Semiphemeral Tweets{% endblock %}
+{% block header_text %}Semiphemeral Tweets{% endblock %}
+{% block content %}
+
+<ul>
+  <li>Total tweets: {{ total_tweets }}</li>
+  <li>Deleted tweets: {{ deleted_tweets }}</li>
+  <li>Excluded tweets: {{ excluded_tweets }}</li>
+  <li>Total threads: {{ total_threads }}</li>
+</ul>
+
+<p>Based on your critera, these are the tweets that will get automatically deleted. Look through them and mark the ones you'd like to exclude from deletion.</p>
+
+{% endblock %}
