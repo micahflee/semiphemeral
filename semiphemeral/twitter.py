@@ -2,7 +2,7 @@ import tweepy
 import json
 import click
 
-from .db import Tweet
+from .db import Tweet, Thread
 
 
 class Twitter(object):
@@ -42,7 +42,7 @@ class Twitter(object):
             self.api.user_timeline,
             id=self.settings.get('username'),
             since_id=since_id
-        ).pages(1):
+        ).pages(3):
             fetched_count = 0
 
             # Import these tweets, and all their threads
@@ -56,6 +56,46 @@ class Twitter(object):
             # Commit the leftovers
             self.session.commit()
 
+            # Now hunt for threads. This is a dict that maps the root status_id
+            # to a list of status_ids in the thread
+            threads = {}
+            for status in page:
+                if status.in_reply_to_status_id:
+                    status_ids = self.calculate_thread(status.id)
+                    root_status_id = status_ids[0]
+                    if root_status_id in threads:
+                        for status_id in status_ids:
+                            if status_id not in threads[root_status_id]:
+                                threads[root_status_id].append(status_id)
+                    else:
+                        threads[root_status_id] = status_ids
+
+            # For each thread, does this thread already exist, or do we create a new one?
+            for root_status_id in threads:
+                status_ids = threads[root_status_id]
+                thread = self.session.query(Thread).filter_by(root_status_id=root_status_id).first()
+                if not thread:
+                    thread = Thread(root_status_id)
+                    count = 0
+                    for status_id in status_ids:
+                        tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
+                        if tweet:
+                            thread.tweets.append(tweet)
+                            count += 1
+                    if count > 0:
+                        click.echo('Added new thread with {} tweets (root id={})'.format(count, root_status_id))
+                else:
+                    count = 0
+                    for status_id in status_ids:
+                        tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
+                        if tweet and tweet not in thread.tweets:
+                            thread.tweets.append(tweet)
+                            count += 1
+                    if count > 0:
+                        click.echo('Added {} tweets to existing thread (root id={})'.format(count, root_status_id))
+                self.session.commit()
+
+
         """
         # All done, update the since_id
         tweet = self.session.query(Tweet).order_by(Tweet.status_id.desc()).first()
@@ -65,6 +105,18 @@ class Twitter(object):
             self.settings.save()
         """
 
+    def calculate_thread(self, status_id):
+        """
+        Given a tweet, recursively add its parents to a thread. In this end, the first
+        element of the list should be the root of the thread
+        """
+        tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
+        if not tweet:
+            return []
+        if not tweet.in_reply_to_status_id:
+            return [status_id]
+        return self.calculate_thread(tweet.in_reply_to_status_id) + [status_id]
+
     def import_tweet(self, tweet):
         """
         This imports a tweet, and recursively imports all tweets that it's in reply to,
@@ -72,6 +124,7 @@ class Twitter(object):
         """
         fetched_count = 0
 
+        # Save the tweet, if it's not already saved
         if not tweet.already_saved(self.session):
             tweet.summarize()
             fetched_count += 1

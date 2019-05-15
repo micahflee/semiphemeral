@@ -1,13 +1,23 @@
 import click
 
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, Boolean, DateTime
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.orm import sessionmaker, relationship
 
 Base = declarative_base()
+
+
+class Thread(Base):
+    __tablename__ = 'threads'
+    id = Column(Integer, primary_key=True)
+    root_status_id = Column(Integer)
+
+    tweets = relationship("Tweet", back_populates="thread")
+
+    def __init__(self, root_status_id):
+        self.root_status_id = root_status_id
 
 
 class Tweet(Base):
@@ -31,6 +41,9 @@ class Tweet(Base):
     is_retweet = Column(Boolean)
     is_deleted = Column(Boolean)
     exclude_from_delete = Column(Boolean)
+
+    thread_id = Column(Integer, ForeignKey('threads.id'))
+    thread = relationship("Thread", back_populates="tweets")
 
     def __init__(self, status):
         self.created_at = status.created_at
