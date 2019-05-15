@@ -110,9 +110,7 @@ class Twitter(object):
         """
         tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
         if not tweet:
-            # If we don't have a local copy of this tweet in the db, probably it's been deleted
-            # so let's treat it like the root of a thread
-            return [status_id]
+            return []
         if not tweet.in_reply_to_status_id:
             return [status_id]
         return self.calculate_thread(tweet.in_reply_to_status_id) + [status_id]
