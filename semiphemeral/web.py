@@ -9,7 +9,8 @@ def create_app(settings, session):
     @app.route("/")
     def index():
         return render_template('index.html',
-            is_configured=settings.is_configured())
+            is_configured=settings.is_configured(),
+            last_fetch=settings.get('last_fetch'))
 
     @app.route("/settings", methods=['GET', 'POST'])
     def edit_settings():
@@ -34,6 +35,7 @@ def create_app(settings, session):
 
         return render_template('settings.html',
             is_configured=settings.is_configured(),
+            last_fetch=settings.get('last_fetch'),
             api_key=settings.get('api_key'),
             api_secret=settings.get('api_secret'),
             access_token_key=settings.get('access_token_key'),

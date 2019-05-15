@@ -1,6 +1,7 @@
 import tweepy
-import json
 import click
+import json
+from datetime import datetime
 
 from .db import Tweet, Thread
 
@@ -104,6 +105,9 @@ class Twitter(object):
             self.settings.set('since_id', new_since_id)
             self.settings.save()
         """
+
+        self.settings.set('last_fetch', datetime.today().strftime('%Y-%m-%d %I:%M%p'))
+        self.settings.save()
 
     def calculate_thread(self, status_id):
         """

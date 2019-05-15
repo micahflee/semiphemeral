@@ -16,6 +16,15 @@
     {% if not is_configured %}
     <p>The Twitter API is not configured yet</p>
     {% endif %}
+
+    <p>
+      Last fetched:
+      {% if not last_fetch %}
+        Never
+      {% else %}
+        {{ last_fetch }}
+      {% endif %}
+    </p>
   </div>
   <div class="content">
     <h1>{% block header_text %}{% endblock %}</h1>
