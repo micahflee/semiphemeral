@@ -96,15 +96,9 @@ class Twitter(object):
                         click.echo('Added {} tweets to existing thread (root id={})'.format(count, root_status_id))
                 self.session.commit()
 
-
-        """
         # All done, update the since_id
-        tweet = self.session.query(Tweet).order_by(Tweet.status_id.desc()).first()
-        if tweet:
-            new_since_id = tweet.status_id
-            self.settings.set('since_id', new_since_id)
-            self.settings.save()
-        """
+        self.settings.set('since_id', page.since_id)
+        self.settings.save()
 
         self.settings.set('last_fetch', datetime.today().strftime('%Y-%m-%d %I:%M%p'))
         self.settings.save()
