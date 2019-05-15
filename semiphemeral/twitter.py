@@ -43,7 +43,7 @@ class Twitter(object):
             self.api.user_timeline,
             id=self.settings.get('username'),
             since_id=since_id
-        ).pages(3):
+        ).pages():
             fetched_count = 0
 
             # Import these tweets, and all their threads
@@ -116,7 +116,9 @@ class Twitter(object):
         """
         tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
         if not tweet:
-            return []
+            # If we don't have a local copy of this tweet in the db, probably it's been deleted
+            # so let's treat it like the root of a thread
+            return [status_id]
         if not tweet.in_reply_to_status_id:
             return [status_id]
         return self.calculate_thread(tweet.in_reply_to_status_id) + [status_id]
@@ -140,8 +142,12 @@ class Twitter(object):
             parent_tweet = self.session.query(Tweet).filter_by(status_id=tweet.in_reply_to_status_id).first()
             if not parent_tweet:
                 # If not, import it
-                status = self.api.get_status(tweet.in_reply_to_status_id)
-                fetched_count += self.import_tweet(Tweet(status))
+                try:
+                    status = self.api.get_status(tweet.in_reply_to_status_id)
+                    fetched_count += self.import_tweet(Tweet(status))
+                except tweepy.error.TweepError:
+                    # If it's been deleted, ignore
+                    pass
 
         return fetched_count
 
