@@ -11,11 +11,11 @@ class Settings(object):
             'access_token_key': '',
             'access_token_secret': '',
             'username': '',
+            'user_id': None,
             'days_threshold': 30,
             'retweet_threshold': 100,
             'like_threshold': 100,
             'threads_threshold': True,
-            'exclude_keybase_proof': True,
             'since_id': None,
             'last_fetch': None
         }

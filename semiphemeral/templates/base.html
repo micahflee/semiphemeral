@@ -13,16 +13,16 @@
       <li><a href="{{ url_for('tweets') }}">tweets</a></li>
     </ul>
 
-    {% if not is_configured %}
+    {% if not sidebar['is_configured'] %}
     <p>The Twitter API is not configured yet</p>
     {% endif %}
 
     <p>
       Last fetched:
-      {% if not last_fetch %}
+      {% if not sidebar['last_fetch'] %}
         Never
       {% else %}
-        {{ last_fetch }}
+        {{ sidebar['last_fetch'] }}
       {% endif %}
     </p>
   </div>

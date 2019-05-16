@@ -53,14 +53,14 @@
     <li>
       <label class="checkbox">
         <input type="checkbox" name="threads_threshold" {% if threads_threshold %}checked="checked"{% endif %} />
-        Don't delete tweets that are part of a thread that at at least one tweet that meets my retweet or like thresholds
+        Don't delete tweets that are part of a thread that contains at least one tweet that meets my retweet or like thresholds
       </label>
     </li>
     <li>
-      <label class="checkbox">
-        <input type="checkbox" name="exclude_keybase_proof" {% if exclude_keybase_proof %}checked="checked"{% endif %} />
-        Don't delete Keybase proofs
-      </label>
+      How do you want to delete old retweets? <br/>
+      <input type="radio" name="retweet_deletion_policy" value="all"> Delete all retweets that are older than the threshold above <br/>
+      <input type="radio" name="retweet_deletion_policy" value="nonfriends"> Don't delete retweets of people I follow who follow me <br/>
+      <input type="radio" name="retweet_deletion_policy" value="none"> Don't delete retweets
     </li>
   </ul>
 

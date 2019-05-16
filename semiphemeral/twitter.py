@@ -26,6 +26,12 @@ class Twitter(object):
         self.api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
         self.authenticated = True
 
+        # Make sure we've saved the user id
+        user = self.api.get_user(self.settings.get('username'))
+        if user:
+            self.settings.set('user_id', user.id)
+            self.settings.save()
+
     def fetch(self):
         if not self.authenticated:
             return
