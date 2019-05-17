@@ -43,11 +43,11 @@ def create_app(settings, session):
                 settings.set('tweets_delete_retweets', request.form['tweets_delete_retweets'] == 'on')
             else:
                 settings.set('tweets_delete_retweets', False)
-            if 'delete_dms' in request.form:
-                settings.set('delete_dms', request.form['delete_dms'] == 'on')
-            else:
-                settings.set('delete_dms', False)
-            settings.set('dms_days_threshold', int(request.form['dms_days_threshold']))
+            #if 'delete_dms' in request.form:
+            #    settings.set('delete_dms', request.form['delete_dms'] == 'on')
+            #else:
+            #    settings.set('delete_dms', False)
+            #settings.set('dms_days_threshold', int(request.form['dms_days_threshold']))
             settings.save()
 
         return render_template('settings.html',
@@ -62,9 +62,9 @@ def create_app(settings, session):
             tweets_retweet_threshold=settings.get('tweets_retweet_threshold'),
             tweets_like_threshold=settings.get('tweets_like_threshold'),
             tweets_threads_threshold=settings.get('tweets_threads_threshold'),
-            tweets_delete_retweets=settings.get('tweets_delete_retweets'),
-            delete_dms=settings.get('delete_dms'),
-            dms_days_threshold=settings.get('dms_days_threshold'))
+            tweets_delete_retweets=settings.get('tweets_delete_retweets'))
+            #delete_dms=settings.get('delete_dms'),
+            #dms_days_threshold=settings.get('dms_days_threshold'))
 
     @app.route("/tweets")
     def tweets():

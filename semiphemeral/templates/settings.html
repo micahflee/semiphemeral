@@ -70,22 +70,6 @@
     </p>
   </fieldset>
 
-  <p>
-    <label class="checkbox">
-      <input type="checkbox" class="delete-dms-checkbox" name="delete_dms" {% if delete_dms %}checked="checked"{% endif %} />
-      Delete old direct messages
-    </label>
-  </p>
-
-  <fieldset class="delete-dms-fieldset">
-    <legend>Delete direct messages unless they are:</legend>
-    <p>
-      Newer than
-      <input class="small" type="text" name="dms_days_threshold" value="{{ dms_days_threshold }}" \>
-      days
-    </p>
-  </fieldset>
-
   <p><input type="submit" value="Save" /></p>
 
 </form>

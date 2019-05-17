@@ -18,9 +18,10 @@ class Settings(object):
             'tweets_like_threshold': 100,
             'tweets_threads_threshold': True,
             'tweets_delete_retweets': True,
-            'delete_dms': True,
-            'dms_days_threshold': 30,
+            #'delete_dms': True,
+            #'dms_days_threshold': 30,
             'since_id': None,
+            #'dms_since_id': None,
             'last_fetch': None
         }
         self.load()

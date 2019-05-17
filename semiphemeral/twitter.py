@@ -36,77 +36,77 @@ class Twitter(object):
         if not self.authenticated:
             return
 
-        # See if we retrieve all tweets, or just tweets since the last fetch
-        since_id = self.settings.get('since_id')
+        if self.settings.get('delete_tweets'):
+            # We fetch tweets since the last fetch (or all tweets, if it's None)
+            since_id = self.settings.get('since_id')
+            if since_id:
+                click.secho('Fetching all recent tweets', bold=True)
+            else:
+                click.secho('Fetching all tweets, this first run may take a long time', bold=True)
 
-        if since_id:
-            click.secho('Fetching all recent tweets', bold=True)
-        else:
-            click.secho('Fetching all tweets, this first run may take a long time', bold=True)
+            # Fetch tweets a page at a time
+            for page in tweepy.Cursor(
+                self.api.user_timeline,
+                id=self.settings.get('username'),
+                since_id=since_id
+            ).pages():
+                fetched_count = 0
 
-        # Fetch tweets a page at a time
-        for page in tweepy.Cursor(
-            self.api.user_timeline,
-            id=self.settings.get('username'),
-            since_id=since_id
-        ).pages():
-            fetched_count = 0
+                # Import these tweets, and all their threads
+                for status in page:
+                    fetched_count += self.import_tweet(Tweet(status))
 
-            # Import these tweets, and all their threads
-            for status in page:
-                fetched_count += self.import_tweet(Tweet(status))
+                    # Only commit every 20 tweets
+                    if fetched_count % 20 == 0:
+                        self.session.commit()
 
-                # Only commit every 20 tweets
-                if fetched_count % 20 == 0:
-                    self.session.commit()
-
-            # Commit the leftovers
-            self.session.commit()
-
-            # Now hunt for threads. This is a dict that maps the root status_id
-            # to a list of status_ids in the thread
-            threads = {}
-            for status in page:
-                if status.in_reply_to_status_id:
-                    status_ids = self.calculate_thread(status.id)
-                    root_status_id = status_ids[0]
-                    if root_status_id in threads:
-                        for status_id in status_ids:
-                            if status_id not in threads[root_status_id]:
-                                threads[root_status_id].append(status_id)
-                    else:
-                        threads[root_status_id] = status_ids
-
-            # For each thread, does this thread already exist, or do we create a new one?
-            for root_status_id in threads:
-                status_ids = threads[root_status_id]
-                thread = self.session.query(Thread).filter_by(root_status_id=root_status_id).first()
-                if not thread:
-                    thread = Thread(root_status_id)
-                    count = 0
-                    for status_id in status_ids:
-                        tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
-                        if tweet:
-                            thread.tweets.append(tweet)
-                            count += 1
-                    if count > 0:
-                        click.echo('Added new thread with {} tweets (root id={})'.format(count, root_status_id))
-                else:
-                    count = 0
-                    for status_id in status_ids:
-                        tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
-                        if tweet and tweet not in thread.tweets:
-                            thread.tweets.append(tweet)
-                            count += 1
-                    if count > 0:
-                        click.echo('Added {} tweets to existing thread (root id={})'.format(count, root_status_id))
+                # Commit the leftovers
                 self.session.commit()
 
-        # All done, update the since_id
-        tweet = self.session.query(Tweet).order_by(Tweet.status_id.desc()).first()
-        if tweet:
-            self.settings.set('since_id', tweet.status_id)
-            self.settings.save()
+                # Now hunt for threads. This is a dict that maps the root status_id
+                # to a list of status_ids in the thread
+                threads = {}
+                for status in page:
+                    if status.in_reply_to_status_id:
+                        status_ids = self.calculate_thread(status.id)
+                        root_status_id = status_ids[0]
+                        if root_status_id in threads:
+                            for status_id in status_ids:
+                                if status_id not in threads[root_status_id]:
+                                    threads[root_status_id].append(status_id)
+                        else:
+                            threads[root_status_id] = status_ids
+
+                # For each thread, does this thread already exist, or do we create a new one?
+                for root_status_id in threads:
+                    status_ids = threads[root_status_id]
+                    thread = self.session.query(Thread).filter_by(root_status_id=root_status_id).first()
+                    if not thread:
+                        thread = Thread(root_status_id)
+                        count = 0
+                        for status_id in status_ids:
+                            tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
+                            if tweet:
+                                thread.tweets.append(tweet)
+                                count += 1
+                        if count > 0:
+                            click.echo('Added new thread with {} tweets (root id={})'.format(count, root_status_id))
+                    else:
+                        count = 0
+                        for status_id in status_ids:
+                            tweet = self.session.query(Tweet).filter_by(status_id=status_id).first()
+                            if tweet and tweet not in thread.tweets:
+                                thread.tweets.append(tweet)
+                                count += 1
+                        if count > 0:
+                            click.echo('Added {} tweets to existing thread (root id={})'.format(count, root_status_id))
+                    self.session.commit()
+
+            # All done, update the since_id
+            tweet = self.session.query(Tweet).order_by(Tweet.status_id.desc()).first()
+            if tweet:
+                self.settings.set('since_id', tweet.status_id)
+                self.settings.save()
 
         self.settings.set('last_fetch', datetime.today().strftime('%Y-%m-%d %I:%M%p'))
         self.settings.save()
