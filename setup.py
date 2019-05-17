@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     description="Automatically delete your old tweets, except for the ones you want to keep",
     long_description_content_type="text/markdown",
-    license="GPLv3+",
+    license="MIT",
     url="https://github.com/micahflee/semiphemeral",
     packages=['semiphemeral'],
     classifiers=(
@@ -29,7 +29,7 @@ setuptools.setup(
     install_requires=[
         'click',
         'colorama',
-        'python-twitter',
+        'tweepy',
         'flask',
         'sqlalchemy'
     ]
