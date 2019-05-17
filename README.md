@@ -22,7 +22,7 @@ Options:
  --help       Show this message and exit.
 ```
 
-Start by running `semiphemeral --configure`, which starts a local web server at http://127.0.0.8:8080/. Load that website in a browser, switch to the settings page.
+Start by running `semiphemeral --configure`, which starts a local web server at http://127.0.0.1:8080/. Load that website in a browser, switch to the settings page.
 
 You must supply Twitter API credentials here, which you can get by following [this guide](https://python-twitter.readthedocs.io/en/latest/getting_started.html) (basically, you need to login to https://developer.twitter.com/ and create a new "Twitter app" that only you will be using).
 
