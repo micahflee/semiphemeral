@@ -32,40 +32,63 @@
     </li>
   </ul>
 
-  <h3>Automatically exlude deleting tweets</h3>
+  <p>
+    <label class="checkbox">
+      <input type="checkbox" class="delete-tweets-checkbox" name="delete_tweets" {% if delete_tweets %}checked="checked"{% endif %} />
+      Delete old tweets
+    </label>
+  </p>
 
-  <ul>
-    <li>
+  <fieldset class="delete-tweets-fieldset">
+    <legend>Delete tweets unless they are:</legend>
+    <p>
       Newer than
-      <input class="small" type="text" name="days_threshold" value="{{ days_threshold }}" \>
+      <input class="small" type="text" name="tweets_days_threshold" value="{{ tweets_days_threshold }}" \>
       days
-    </li>
-    <li>
+    </p>
+    <p>
       With over
-      <input class="small" type="text" name="retweet_threshold" value="{{ retweet_threshold }}" \>
+      <input class="small" type="text" name="tweets_retweet_threshold" value="{{ tweets_retweet_threshold }}" \>
       retweets
-    </li>
-    <li>
+    </p>
+    <p>
       With over
-      <input class="small" type="text" name="like_threshold" value="{{ like_threshold }}" \>
+      <input class="small" type="text" name="tweets_like_threshold" value="{{ tweets_like_threshold }}" \>
       likes
-    </li>
-    <li>
+    </p>
+    <p>
       <label class="checkbox">
-        <input type="checkbox" name="threads_threshold" {% if threads_threshold %}checked="checked"{% endif %} />
-        Don't delete tweets that are part of a thread that contains at least one tweet that meets my retweet or like thresholds
+        <input type="checkbox" name="tweets_threads_threshold" {% if tweets_threads_threshold %}checked="checked"{% endif %} />
+        Don't delete tweets that are part of a thread that contains at least one tweet that meets these thresholds
       </label>
-    </li>
-    <li>
-      How do you want to delete old retweets? <br/>
-      <input type="radio" name="retweet_deletion_policy" value="all"> Delete all retweets that are older than the threshold above <br/>
-      <input type="radio" name="retweet_deletion_policy" value="nonfriends"> Don't delete retweets of people I follow who follow me <br/>
-      <input type="radio" name="retweet_deletion_policy" value="none"> Don't delete retweets
-    </li>
-  </ul>
+    </p>
+    <p>
+      <label class="checkbox">
+        <input type="checkbox" name="tweets_delete_retweets" {% if tweets_delete_retweets %}checked="checked"{% endif %} />
+        Delete all retweets older than the threshold above
+      </label>
+    </p>
+  </fieldset>
+
+  <p>
+    <label class="checkbox">
+      <input type="checkbox" class="delete-dms-checkbox" name="delete_dms" {% if delete_dms %}checked="checked"{% endif %} />
+      Delete old direct messages
+    </label>
+  </p>
+
+  <fieldset class="delete-dms-fieldset">
+    <legend>Delete direct messages unless they are:</legend>
+    <p>
+      Newer than
+      <input class="small" type="text" name="dms_days_threshold" value="{{ dms_days_threshold }}" \>
+      days
+    </p>
+  </fieldset>
 
   <p><input type="submit" value="Save" /></p>
 
 </form>
 
+<script src="/static/js/settings.js"></script>
 {% endblock %}

@@ -12,10 +12,14 @@ class Settings(object):
             'access_token_secret': '',
             'username': '',
             'user_id': None,
-            'days_threshold': 30,
-            'retweet_threshold': 100,
-            'like_threshold': 100,
-            'threads_threshold': True,
+            'delete_tweets': True,
+            'tweets_days_threshold': 30,
+            'tweets_retweet_threshold': 100,
+            'tweets_like_threshold': 100,
+            'tweets_threads_threshold': True,
+            'tweets_delete_retweets': True,
+            'delete_dms': True,
+            'dms_days_threshold': 30,
             'since_id': None,
             'last_fetch': None
         }

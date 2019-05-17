@@ -28,17 +28,26 @@ def create_app(settings, session):
             settings.set('access_token_key', request.form['access_token_key'])
             settings.set('access_token_secret', request.form['access_token_secret'])
             settings.set('username', request.form['username'])
-            settings.set('days_threshold', int(request.form['days_threshold']))
-            settings.set('retweet_threshold', int(request.form['retweet_threshold']))
-            settings.set('like_threshold', int(request.form['like_threshold']))
-            if 'threads_threshold' in request.form:
-                settings.set('threads_threshold', request.form['threads_threshold'] == 'on')
+            if 'delete_tweets' in request.form:
+                settings.set('delete_tweets', request.form['delete_tweets'] == 'on')
             else:
-                settings.set('threads_threshold', False)
-            if 'exclude_keybase_proof' in request.form:
-                settings.set('exclude_keybase_proof', request.form['exclude_keybase_proof'] == 'on')
+                settings.set('delete_tweets', False)
+            settings.set('tweets_days_threshold', int(request.form['tweets_days_threshold']))
+            settings.set('tweets_retweet_threshold', int(request.form['tweets_retweet_threshold']))
+            settings.set('tweets_like_threshold', int(request.form['tweets_like_threshold']))
+            if 'tweets_threads_threshold' in request.form:
+                settings.set('tweets_threads_threshold', request.form['tweets_threads_threshold'] == 'on')
             else:
-                settings.set('exclude_keybase_proof', False)
+                settings.set('tweets_threads_threshold', False)
+            if 'tweets_delete_retweets' in request.form:
+                settings.set('tweets_delete_retweets', request.form['tweets_delete_retweets'] == 'on')
+            else:
+                settings.set('tweets_delete_retweets', False)
+            if 'delete_dms' in request.form:
+                settings.set('delete_dms', request.form['delete_dms'] == 'on')
+            else:
+                settings.set('delete_dms', False)
+            settings.set('dms_days_threshold', int(request.form['dms_days_threshold']))
             settings.save()
 
         return render_template('settings.html',
@@ -48,10 +57,14 @@ def create_app(settings, session):
             access_token_key=settings.get('access_token_key'),
             access_token_secret=settings.get('access_token_secret'),
             username=settings.get('username'),
-            days_threshold=settings.get('days_threshold'),
-            retweet_threshold=settings.get('retweet_threshold'),
-            like_threshold=settings.get('like_threshold'),
-            threads_threshold=settings.get('threads_threshold'))
+            delete_tweets=settings.get('delete_tweets'),
+            tweets_days_threshold=settings.get('tweets_days_threshold'),
+            tweets_retweet_threshold=settings.get('tweets_retweet_threshold'),
+            tweets_like_threshold=settings.get('tweets_like_threshold'),
+            tweets_threads_threshold=settings.get('tweets_threads_threshold'),
+            tweets_delete_retweets=settings.get('tweets_delete_retweets'),
+            delete_dms=settings.get('delete_dms'),
+            dms_days_threshold=settings.get('dms_days_threshold'))
 
     @app.route("/tweets")
     def tweets():
