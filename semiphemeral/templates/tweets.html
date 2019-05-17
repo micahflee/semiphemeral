@@ -3,16 +3,6 @@
 {% block header_text %}Semiphemeral Tweets{% endblock %}
 {% block content %}
 
-<ul>
-  <li>My tweets: {{ '{:,}'.format(my_tweets) }}</li>
-  <li>My retweets: {{ '{:,}'.format(my_retweets) }}</li>
-  <li>Deleted tweets: {{ '{:,}'.format(deleted_tweets) }}</li>
-  <li>Deleted retweets: {{ '{:,}'.format(deleted_retweets) }}</li>
-  <li>Excluded tweets: {{ '{:,}'.format(excluded_tweets) }}</li>
-  <li>Tweets from other users: {{ '{:,}'.format(other_tweets) }}</li>
-  <li>Threads: {{ '{:,}'.format(threads) }}</li>
-</ul>
-
 <p>Based on your critera, these are the tweets that will get automatically deleted. Look through them and mark the ones you'd like to exclude from deletion.</p>
 
 {% endblock %}

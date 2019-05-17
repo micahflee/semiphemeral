@@ -4,6 +4,7 @@
   <title>{% block title %}{% endblock %}</title>
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/js/lib/jquery-3.4.1.min.js"></script>
+  <script src="/static/js/base.js"></script>
 </head>
 
 <body>
@@ -14,18 +15,20 @@
       <li><a href="{{ url_for('tweets') }}">tweets</a></li>
     </ul>
 
-    {% if not sidebar['is_configured'] %}
-    <p>The Twitter API is not configured yet</p>
-    {% endif %}
+    <div class="statistics">
+      <ul>
+        <li>configured: <span class="value is_configured"></span></li>
+        <li>last fetch: <span class="value last_fetch"></span></li>
+        <li><span class="value my_tweets"></span> tweets</li>
+        <li><span class="value my_retweets"></span> retweets</li>
+        <li><span class="value deleted_tweets"></span> deleted tweets</li>
+        <li><span class="value deleted_retweets"></span> deleted retweets</li>
+        <li><span class="value excluded_tweets"></span> excluded tweets</li>
+        <li><span class="value other_tweets"></span> tweets from other users</li>
+        <li><span class="value threads"></span> threads</li>
+      </ul>
+    </div>
 
-    <p>
-      Last fetched:
-      {% if not sidebar['last_fetch'] %}
-        Never
-      {% else %}
-        {{ sidebar['last_fetch'] }}
-      {% endif %}
-    </p>
   </div>
   <div class="content">
     <h1>{% block header_text %}{% endblock %}</h1>

@@ -4,7 +4,7 @@ body {
 
 .sidebar {
   height: 100%;
-  width: 160px;
+  width: 250px;
   position: fixed;
   z-index: 1;
   top: 0;
@@ -35,8 +35,22 @@ body {
   font-weight: bold;
 }
 
+.sidebar .statistics {
+  margin-top: 20px;
+}
+
+.sidebar .statistics ul li {
+  text-align: left;
+  color: #666666;
+  margin-bottom: 10px;
+}
+
+.sidebar .statistics .value {
+  color: #e5d204;
+}
+
 .content {
-  margin-left: 180px;
+  margin-left: 270px;
   padding: 0px 10px;
 }
 

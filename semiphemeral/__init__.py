@@ -27,7 +27,7 @@ def main(configure, fetch, delete, debug):
         click.echo('http://127.0.0.1:8080')
         click.echo('')
         app = create_app(settings, session)
-        app.run(host='127.0.0.1', port=8080, debug=debug)
+        app.run(host='127.0.0.1', port=8080, threaded=False, debug=debug)
 
     elif fetch:
         t = Twitter(settings, session)
