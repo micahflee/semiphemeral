@@ -40,6 +40,7 @@ class Tweet(Base):
     favorited = Column(Boolean)
     is_retweet = Column(Boolean)
     is_deleted = Column(Boolean)
+    is_unliked = Column(Boolean)
     exclude_from_delete = Column(Boolean)
 
     thread_id = Column(Integer, ForeignKey('threads.id'))
@@ -63,6 +64,7 @@ class Tweet(Base):
         self.favorited = status.favorited
         self.is_retweet = hasattr(status, 'retweeted_status')
         self.is_deleted = False
+        self.is_unliked = False
         self.exclude_from_delete = False
 
     def already_saved(self, session):

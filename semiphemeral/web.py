@@ -84,6 +84,7 @@ def create_app(settings, session):
         my_likes = session.execute('SELECT COUNT(*) FROM tweets WHERE favorited=1').first()[0]
         deleted_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=0'.format(int(settings.get('user_id')))).first()[0]
         deleted_retweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=1'.format(int(settings.get('user_id')))).first()[0]
+        unliked_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE favorited=1 AND is_unliked=1').first()[0]
         excluded_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND exclude_from_delete=1'.format(int(settings.get('user_id')))).first()[0]
         other_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id!={}'.format(int(settings.get('user_id')))).first()[0]
         threads = session.execute('SELECT COUNT(*) FROM threads').first()[0]
@@ -96,6 +97,7 @@ def create_app(settings, session):
             'my_likes': my_likes,
             'deleted_tweets': deleted_tweets,
             'deleted_retweets': deleted_retweets,
+            'unliked_tweets': unliked_tweets,
             'excluded_tweets': excluded_tweets,
             'other_tweets': other_tweets,
             'threads': threads

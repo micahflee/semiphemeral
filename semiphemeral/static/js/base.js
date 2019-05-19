@@ -12,6 +12,7 @@ $(function(){
     $('.statistics .my_likes').text(comma_formatted(data.my_likes));
     $('.statistics .deleted_tweets').text(comma_formatted(data.deleted_tweets));
     $('.statistics .deleted_retweets').text(comma_formatted(data.deleted_retweets));
+    $('.statistics .unliked_tweets').text(comma_formatted(data.unliked_tweets));
     $('.statistics .excluded_tweets').text(comma_formatted(data.excluded_tweets));
     $('.statistics .other_tweets').text(comma_formatted(data.other_tweets));
     $('.statistics .threads').text(comma_formatted(data.threads));
