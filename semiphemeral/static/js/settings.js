@@ -6,14 +6,14 @@ $(function(){
       $('.delete-tweets-fieldset').hide();
     }
 
-    if($('.delete-dms-checkbox').prop('checked')) {
-      $('.delete-dms-fieldset').show();
+    if($('.retweets-likes-checkbox').prop('checked')) {
+      $('.retweets-likes-fieldset').show();
     } else {
-      $('.delete-dms-fieldset').hide();
+      $('.retweets-likes-fieldset').hide();
     }
   }
 
   $('.delete-tweets-checkbox').change(update_ui);
-  $('.delete-dms-checkbox').change(update_ui);
+  $('.retweets-likes-checkbox').change(update_ui);
   update_ui();
 })
