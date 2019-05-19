@@ -1,7 +1,7 @@
 import tweepy
 import click
 import json
-from datetime import datetime
+import datetime
 
 from .db import Tweet, Thread
 
@@ -31,6 +31,9 @@ class Twitter(object):
         if user:
             self.settings.set('user_id', user.id)
             self.settings.save()
+
+        # Date format for saving last_fetch setting
+        self.last_fetch_format = '%Y-%m-%d %I:%M%p'
 
     def fetch(self):
         if not self.authenticated:
@@ -102,12 +105,22 @@ class Twitter(object):
                             click.echo('Added {} tweets to existing thread (root id={})'.format(count, root_status_id))
                     self.session.commit()
 
+            # It appears that twitter will only return the last 4000 likes. So if
+            # it's been over a day since the last fetch, try fetching all likes again
+            like_since_id = since_id
+            last_fetch_str = self.settings.get('last_fetch')
+            if last_fetch_str:
+                last_fetch = datetime.datetime.strptime(last_fetch_str, self.last_fetch_format)
+                now = datetime.datetime.now()
+                if now - last_fetch > datetime.timedelta(days=1):
+                    like_since_id = None
+
             # Fetch tweets that are liked
             click.secho('Fetching tweets that you liked', fg='cyan')
             for page in tweepy.Cursor(
                 self.api.favorites,
                 id=self.settings.get('username'),
-                since_id=since_id
+                since_id=like_since_id
             ).pages():
                 # Import these tweets, and all their threads
                 for status in page:
@@ -124,7 +137,7 @@ class Twitter(object):
                 self.settings.set('since_id', tweet.status_id)
                 self.settings.save()
 
-        self.settings.set('last_fetch', datetime.today().strftime('%Y-%m-%d %I:%M%p'))
+        self.settings.set('last_fetch', datetime.datetime.today().strftime(self.last_fetch_format))
         self.settings.save()
 
     def calculate_thread(self, status_id):
