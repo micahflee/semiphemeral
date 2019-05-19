@@ -40,11 +40,11 @@ class Twitter(object):
             # We fetch tweets since the last fetch (or all tweets, if it's None)
             since_id = self.settings.get('since_id')
             if since_id:
-                click.secho('Fetching all recent tweets', bold=True)
+                click.secho('Fetching all recent tweets', fg='cyan')
             else:
-                click.secho('Fetching all tweets, this first run may take a long time', bold=True)
+                click.secho('Fetching all tweets, this first run may take a long time', fg='cyan')
 
-            # Fetch tweets a page at a time
+            # Fetch tweets from timeline a page at a time
             for page in tweepy.Cursor(
                 self.api.user_timeline,
                 id=self.settings.get('username'),
@@ -101,6 +101,22 @@ class Twitter(object):
                         if count > 0:
                             click.echo('Added {} tweets to existing thread (root id={})'.format(count, root_status_id))
                     self.session.commit()
+
+            # Fetch tweets that are liked
+            click.secho('Fetching tweets that you liked', fg='cyan')
+            for page in tweepy.Cursor(
+                self.api.favorites,
+                id=self.settings.get('username'),
+                since_id=since_id
+            ).pages():
+                # Import these tweets, and all their threads
+                for status in page:
+                    tweet = Tweet(status)
+                    if not tweet.already_saved(self.session):
+                        tweet.summarize()
+                        self.session.add(tweet)
+                # Commit a page of tweets at a time
+                self.session.commit()
 
             # All done, update the since_id
             tweet = self.session.query(Tweet).order_by(Tweet.status_id.desc()).first()

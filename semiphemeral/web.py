@@ -81,6 +81,7 @@ def create_app(settings, session):
         last_fetch = settings.get('last_fetch')
         my_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=0'.format(int(settings.get('user_id')))).first()[0]
         my_retweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=1'.format(int(settings.get('user_id')))).first()[0]
+        my_likes = session.execute('SELECT COUNT(*) FROM tweets WHERE favorited=1').first()[0]
         deleted_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=0'.format(int(settings.get('user_id')))).first()[0]
         deleted_retweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=1'.format(int(settings.get('user_id')))).first()[0]
         excluded_tweets = session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND exclude_from_delete=1'.format(int(settings.get('user_id')))).first()[0]
@@ -92,6 +93,7 @@ def create_app(settings, session):
             'last_fetch': last_fetch,
             'my_tweets': my_tweets,
             'my_retweets': my_retweets,
+            'my_likes': my_likes,
             'deleted_tweets': deleted_tweets,
             'deleted_retweets': deleted_retweets,
             'excluded_tweets': excluded_tweets,

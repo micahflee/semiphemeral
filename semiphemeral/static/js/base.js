@@ -9,6 +9,7 @@ $(function(){
     $('.statistics .last_fetch').text(data.last_fetch);
     $('.statistics .my_tweets').text(comma_formatted(data.my_tweets));
     $('.statistics .my_retweets').text(comma_formatted(data.my_retweets));
+    $('.statistics .my_likes').text(comma_formatted(data.my_likes));
     $('.statistics .deleted_tweets').text(comma_formatted(data.deleted_tweets));
     $('.statistics .deleted_retweets').text(comma_formatted(data.deleted_retweets));
     $('.statistics .excluded_tweets').text(comma_formatted(data.excluded_tweets));
