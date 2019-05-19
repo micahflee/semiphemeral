@@ -3,6 +3,10 @@
 {% block header_text %}Semiphemeral Tweets{% endblock %}
 {% block content %}
 
-<p>Based on your critera, these are the tweets that will get automatically deleted. Look through them and mark the ones you'd like to exclude from deletion.</p>
+<p>Here are the tweets that will get deleted.</p>
 
+<div class="tweets-to-delete"></div>
+
+<script sync src="https://platform.twitter.com/widgets.js"></script>
+<script src="/static/js/tweets.js"></script>
 {% endblock %}
