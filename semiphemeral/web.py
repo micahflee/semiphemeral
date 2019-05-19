@@ -1,7 +1,9 @@
 import datetime
+import json
 from flask import Flask, request, render_template, jsonify
 
 from .db import Tweet, Thread
+from .twitter import Twitter
 
 
 def create_app(settings, session):
@@ -34,7 +36,6 @@ def create_app(settings, session):
             else:
                 settings.set('tweets_threads_threshold', False)
 
-
             if 'retweets_likes' in request.form:
                 settings.set('retweets_likes', request.form['retweets_likes'] == 'on')
             else:
@@ -51,6 +52,10 @@ def create_app(settings, session):
             settings.set('retweets_likes_likes_threshold', int(request.form['retweets_likes_likes_threshold']))
 
             settings.save()
+
+            # Recalculate excluded threads with these new settings
+            twitter = Twitter(settings, session)
+            twitter.calculate_excluded_threads()
 
         return render_template('settings.html',
             api_key=settings.get('api_key'),
@@ -105,39 +110,37 @@ def create_app(settings, session):
 
     @app.route("/api/tweets-to-delete")
     def api_tweets_to_delete():
-        # This route is not fully implemented yet
-
+        """
+        This returns a dictionary of status_ids mapped to the text of all tweets that should be deleted
+        """
         settings.load()
         datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=settings.get('tweets_days_threshold'))
 
-        # Select threads that we should preserve
-        query = session.query(Thread).join(Thread.tweets, aliased=True) \
-            .filter(Tweet.user_id == int(settings.get('user_id'))) \
-            .filter(Tweet.is_deleted == 0) \
-            .filter(Tweet.is_retweet == 0) \
-            .filter(Tweet.retweet_count >= settings.get('tweets_retweet_threshold')) \
-            .filter(Tweet.favorite_count >= settings.get('tweets_like_threshold'))
+        # Select tweets from threads to exclude
+        tweets_to_exclude = []
+        threads = session.query(Thread) \
+            .filter(Thread.should_exclude == True) \
+            .all()
+        for thread in threads:
+            for tweet in thread.tweets:
+                if tweet.user_id == settings.get('user_id'):
+                    tweets_to_exclude.append(tweet.status_id)
 
-        """
         # Select tweets that we will delete
-        query = session.query(Tweet) \
+        tweets_to_delete = {}
+        tweets = session.query(Tweet) \
             .filter(Tweet.user_id == int(settings.get('user_id'))) \
             .filter(Tweet.is_deleted == 0) \
             .filter(Tweet.is_retweet == 0) \
             .filter(Tweet.exclude_from_delete == 0) \
             .filter(Tweet.created_at < datetime_threshold) \
             .filter(Tweet.retweet_count < settings.get('tweets_retweet_threshold')) \
-            .filter(Tweet.favorite_count < settings.get('tweets_like_threshold'))
+            .filter(Tweet.favorite_count < settings.get('tweets_like_threshold')) \
+            .all()
+        for tweet in tweets:
+            if tweet.status_id not in tweets_to_exclude:
+                tweets_to_delete[tweet.status_id] = tweet.text
 
-        # Exclude tweets that are part of a thread that contains at least one tweet that's excluded
-        if settings.get('tweets_threads_threshold'):
-            pass
-        """
-
-        data = []
-        for row in query.all():
-            data.append(row.root_status_id)
-
-        return jsonify(data)
+        return jsonify(tweets_to_delete)
 
     return app

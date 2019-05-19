@@ -137,6 +137,9 @@ class Twitter(object):
                 self.settings.set('since_id', tweet.status_id)
                 self.settings.save()
 
+        # Calculate which threads should be excluded from deletion
+        self.calculate_excluded_threads()
+
         self.settings.set('last_fetch', datetime.datetime.today().strftime(self.last_fetch_format))
         self.settings.save()
 
@@ -179,6 +182,30 @@ class Twitter(object):
                     pass
 
         return fetched_count
+
+    def calculate_excluded_threads(self):
+        """
+        Based on the current settings, figure out which threads should be excluded from
+        deletion, and which threads should have their tweets deleted
+        """
+        click.secho('Calculating which threads should be excluded', fg='cyan')
+
+        # Reset the should_exclude flag for all threads
+        self.session.query(Thread).update({"should_exclude": False})
+        self.session.commit()
+
+        # Set should_exclude for all threads based on the settings
+        if self.settings.get('tweets_threads_threshold'):
+            threads = self.session.query(Thread).join(Thread.tweets, aliased=True) \
+                .filter(Tweet.user_id == int(self.settings.get('user_id'))) \
+                .filter(Tweet.is_deleted == 0) \
+                .filter(Tweet.is_retweet == 0) \
+                .filter(Tweet.retweet_count >= self.settings.get('tweets_retweet_threshold')) \
+                .filter(Tweet.favorite_count >= self.settings.get('tweets_like_threshold')) \
+                .all()
+            for thread in threads:
+                thread.should_exclude = True
+            self.session.commit()
 
     def delete(self):
         if not self.authenticated:

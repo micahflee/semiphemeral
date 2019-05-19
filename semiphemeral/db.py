@@ -13,11 +13,13 @@ class Thread(Base):
     __tablename__ = 'threads'
     id = Column(Integer, primary_key=True)
     root_status_id = Column(Integer)
+    should_exclude = Column(Boolean)
 
     tweets = relationship("Tweet", back_populates="thread")
 
     def __init__(self, root_status_id):
         self.root_status_id = root_status_id
+        self.should_exclude = False
 
 
 class Tweet(Base):
