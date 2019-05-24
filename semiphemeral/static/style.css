@@ -91,3 +91,29 @@ form input[type="text"] {
 form input.small {
   width: 50px;
 }
+
+.tweets-to-delete .tweet {
+  display: inline-block;
+  margin: 0 20px 20px 0;
+}
+
+.pagination {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.pagination .item {
+  padding: 5px 10px;
+  margin: 10px;
+  font-size: 1.2em;
+  color: #034b9e;
+  cursor: pointer;
+  border: 1px solid #999999;
+}
+
+.pagination .item-current {
+  color: #000000;
+  font-weight: bold;
+  cursor: auto;
+  border: 0;
+}
