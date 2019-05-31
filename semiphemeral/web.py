@@ -139,7 +139,12 @@ def create_app(settings, session):
             .all()
         for tweet in tweets:
             if tweet.status_id not in tweets_to_exclude:
-                tweets_to_delete[tweet.status_id] = tweet.text
+                tweets_to_delete[tweet.status_id] = {
+                    'text': tweet.text,
+                    'retweets': tweet.retweet_count,
+                    'likes': tweet.favorite_count,
+                    'excluded': tweet.exclude_from_delete
+                }
 
         return jsonify(tweets_to_delete)
 

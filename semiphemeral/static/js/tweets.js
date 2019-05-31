@@ -1,77 +1,105 @@
-function change_state(q, page, count) {
-  var new_state = { q:q, page:page, count:count };
-  window.location = '#'+JSON.stringify(new_state);
-}
+$(function(){
 
-function display_tweets() {
-  var q = window.semiphemeral.state.q;
-  var page = window.semiphemeral.state.page;
-  var count = window.semiphemeral.state.count;
+  function change_state(q, page, count) {
+    var new_state = { q:q, page:page, count:count };
+    window.location = '#'+JSON.stringify(new_state);
+  }
 
-  var ids;
-  if(q == "") {
-    ids = window.semiphemeral.ids;
-  } else {
-    ids = [];
-    for(var i=0; i<window.semiphemeral.ids.length; i++) {
-      var id = window.semiphemeral.ids[i];
-      if(window.semiphemeral.tweets[id].includes(q)) {
-        ids.push(id);
+  function toggle_exclude(id, excluded) {
+    console.log('toggle_exclude, id='+id+', exluded='+excluded);
+    if(excluded) {
+      $('#toggle-exclude-label-'+id).addClass('excluded').text('Excluded from deletion');
+    } else {
+      $('#toggle-exclude-label-'+id).removeClass('excluded').text('Staged for deletion');
+    }
+  }
+
+  function display_tweets() {
+    console.log('display_tweets', window.semiphemeral);
+
+    var q = window.semiphemeral.state.q;
+    var page = window.semiphemeral.state.page;
+    var count = window.semiphemeral.state.count;
+
+    // Build list of ids to filter
+    var ids;
+    if(q == "") {
+      ids = window.semiphemeral.ids;
+    } else {
+      ids = [];
+      for(var i=0; i<window.semiphemeral.ids.length; i++) {
+        var id = window.semiphemeral.ids[i];
+        if(window.semiphemeral.tweets[id].text.includes(q)) {
+          ids.push(id);
+        }
       }
     }
-  }
 
-  console.log('display_tweets', window.semiphemeral);
+    // Empty what previous page
+    $('.info').empty();
+    $('.tweets-to-delete').empty();
+    $('.pagination').empty();
 
-  // Empty what previous page
-  $('.info').empty();
-  $('.tweets-to-delete').empty();
-  $('.pagination').empty();
+    // Display info
+    var num_pages = Math.ceil(ids.length / count);
+    var info_string = 'Page '+comma_formatted(page)+' of '+comma_formatted(num_pages)+' - ';
+    if(ids.length != window.semiphemeral.ids.length) {
+        info_string += 'filtering to '+comma_formatted(ids.length)+' tweets - '
+    }
+    info_string += comma_formatted(window.semiphemeral.ids.length)+' tweets are staged for deletion';
+    $('.info').append($('<div/>').html(info_string));
 
-  // Display info
-  var num_pages = Math.ceil(ids.length / count);
-  var info_string = 'Page '+comma_formatted(page)+' of '+comma_formatted(num_pages)+' - ';
-  if(ids.length != window.semiphemeral.ids.length) {
-      info_string += 'filtering to '+comma_formatted(ids.length)+' tweets - '
-  }
-  info_string += comma_formatted(window.semiphemeral.ids.length)+' tweets are staged for deletion';
-  $('.info').append($('<div/>').html(info_string));
+    // Pagination controls
+    function add_pagination_item(text, new_page) {
+      var $item = $('<span/>').addClass('pagination-item');
+      if(new_page == page) {
+        $item.addClass('pagination-item-current').text(text);
+      } else {
+        var new_state = { q:q, page:new_page, count:count };
+        var $link = $('<a/>').attr('href', '#'+JSON.stringify(new_state)).text(text);
+        $item.append($link);
+      }
 
-  // Pagination controls
-  function add_pagination_item(text, new_page) {
-    var $item = $('<span/>').addClass('pagination-item');
-    if(new_page == page) {
-      $item.addClass('pagination-item-current').text(text);
-    } else {
-      var new_state = { q:q, page:new_page, count:count };
-      var $link = $('<a/>').attr('href', '#'+JSON.stringify(new_state)).text(text);
-      $item.append($link);
+      $('.pagination').append($item);
+    }
+    if(page > 0) {
+      add_pagination_item('Previous', page-1);
+    }
+    for(var i=page-5; i<page+5; i++) {
+      if(i >= 0 && i <= num_pages-1) {
+        add_pagination_item(i, i);
+      }
+    }
+    if(page < num_pages-1) {
+      add_pagination_item('Next', page+1);
     }
 
-    $('.pagination').append($item);
-  }
-  if(page > 0) {
-    add_pagination_item('Previous', page-1);
-  }
-  for(var i=page-5; i<page+5; i++) {
-    if(i >= 0 && i <= num_pages-1) {
-      add_pagination_item(i, i);
+    // Display the page of tweets
+    for(var i=page*count; i<(page+1)*count; i++) {
+      var $embed = $('<div/>').prop('id', 'tweet-'+ids[i]);
+      var $info = $('<div/>').addClass('info')
+        .append(
+          $('<label/>')
+            .append($('<input type="checkbox">')
+              .data('tweet-id', ids[i])
+              .change(function(){
+                toggle_exclude($(this).data('tweet-id'), this.checked);
+              }))
+            .append($('<span/>').addClass('toggle-exclude-label').prop('id', 'toggle-exclude-label-'+ids[i]))
+        )
+        .append($('<div class="stats">'+window.semiphemeral.tweets[ids[i]].retweets+' retweets, '+window.semiphemeral.tweets[ids[i]].likes+' likes</div>'));
+
+      var $tweet = $('<div/>').addClass('tweet').append($info).append($embed);
+
+      $('.tweets-to-delete').append($tweet);
+      toggle_exclude(ids[i], window.semiphemeral.tweets[ids[i]].excluded);
+
+      twttr.widgets.createTweet(ids[i], $('#tweet-'+ids[i])[0], {
+        'dnt': true
+      });
     }
   }
-  if(page < num_pages-1) {
-    add_pagination_item('Next', page+1);
-  }
 
-  // Display the page of tweets
-  for(var i=page*count; i<(page+1)*count; i++) {
-    $('.tweets-to-delete').append('<div class="tweet" id="tweet-'+ids[i]+'"></div>');
-    twttr.widgets.createTweet(ids[i], $('#tweet-'+ids[i])[0], {
-      'dnt': true
-    });
-  }
-}
-
-$(function(){
   // Ajax loader
   $('.tweets-to-delete').html('<img src="/static/img/loading.gif" alt="">');
 

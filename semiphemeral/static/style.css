@@ -62,33 +62,33 @@ body {
   color: #444d93;
 }
 
-form ul {
+.settings form ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-form ul li {
+.settings form ul li {
   margin-bottom: 1em;
 }
 
-form label {
+.settings form label {
   display: inline-block;
   width: 12em;
   text-align: right;
 }
 
-form label.checkbox {
+.settings form label.checkbox {
   display: inline;
   width: auto;
   text-align: left;
 }
 
-form input[type="text"] {
+.settings form input[type="text"] {
   width: 500px;
 }
 
-form input.small {
+.settings form input.small {
   width: 50px;
 }
 
@@ -148,4 +148,18 @@ form input.small {
 .tweets .tweets-to-delete .tweet {
   display: inline-block;
   margin: 0 20px 20px 0;
+  margin-top: 5px;
+}
+
+.tweets .tweets-to-delete .tweet .info .toggle-exclude-label {
+  margin-left: 5px;
+}
+
+.tweets .tweets-to-delete .tweet .info .toggle-exclude-label.excluded {
+  font-weight: bold;
+}
+
+.tweets .tweets-to-delete .tweet .info .stats {
+  font-size: 0.8em;
+  color: #666666;
 }
