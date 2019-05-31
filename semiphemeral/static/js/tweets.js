@@ -1,9 +1,27 @@
-function display_tweets(values) {
-  var ids = window.semiphemeral.ids;
-  var page = values.page;
-  var count = values.count;
+function change_state(q, page, count) {
+  var new_state = { q:q, page:page, count:count };
+  window.location = '#'+JSON.stringify(new_state);
+}
 
-  console.log('display_tweets', 'ids=' + ids.length + ', page='+page+', count='+count);
+function display_tweets() {
+  var q = window.semiphemeral.state.q;
+  var page = window.semiphemeral.state.page;
+  var count = window.semiphemeral.state.count;
+
+  var ids;
+  if(q == "") {
+    ids = window.semiphemeral.ids;
+  } else {
+    ids = [];
+    for(var i=0; i<window.semiphemeral.ids.length; i++) {
+      var id = window.semiphemeral.ids[i];
+      if(window.semiphemeral.tweets[id].includes(q)) {
+        ids.push(id);
+      }
+    }
+  }
+
+  console.log('display_tweets', window.semiphemeral);
 
   // Empty what previous page
   $('.info').empty();
@@ -12,18 +30,21 @@ function display_tweets(values) {
 
   // Display info
   var num_pages = Math.ceil(ids.length / count);
-  $('.info').append($('<div/>').html('Page '+comma_formatted(page)+' of '+comma_formatted(num_pages)+' - '+comma_formatted(ids.length-1)+' tweets are staged for deletion'));
+  var info_string = 'Page '+comma_formatted(page)+' of '+comma_formatted(num_pages)+' - ';
+  if(ids.length != window.semiphemeral.ids.length) {
+      info_string += 'filtering to '+comma_formatted(ids.length)+' tweets - '
+  }
+  info_string += comma_formatted(window.semiphemeral.ids.length)+' tweets are staged for deletion';
+  $('.info').append($('<div/>').html(info_string));
 
   // Pagination controls
   function add_pagination_item(text, new_page) {
-    console.log('add_pagination_item', text)
-
     var $item = $('<span/>').addClass('pagination-item');
     if(new_page == page) {
       $item.addClass('pagination-item-current').text(text);
     } else {
-      var values = { q:"", page:new_page, count:count };
-      var $link = $('<a/>').attr('href', '#'+JSON.stringify(values)).text(text);
+      var new_state = { q:q, page:new_page, count:count };
+      var $link = $('<a/>').attr('href', '#'+JSON.stringify(new_state)).text(text);
       $item.append($link);
     }
 
@@ -73,12 +94,15 @@ $(function(){
       if(window.location.hash == "") return false;
       try {
         var hash = decodeURIComponent(window.location.hash).substr(1);
-        var values = JSON.parse(hash);
-        display_tweets(values);
-        return true;
+        window.semiphemeral.state = JSON.parse(hash);
+        $('.filter input').val(window.semiphemeral.state.q);
       } catch {
+        console.log('parsing hash failed', hash);
         return false;
       }
+
+      display_tweets();
+      return true;
     }
 
     // Watch for changes in the URL hash
@@ -86,9 +110,16 @@ $(function(){
       parse_hash();
     });
 
+    // Filter search results
+    $('.filter input').change(function(){
+      var q = $(this).val();
+      console.log('filtering on', q);
+      change_state(q, window.semiphemeral.state.page, window.semiphemeral.state.count);
+    });
+
     // Display tweets
     if(!parse_hash()) {
-      display_tweets({ q: "", page: 0, count: 20 });
+      change_state("", 0, 50);
     }
   })
 })
