@@ -92,28 +92,60 @@ form input.small {
   width: 50px;
 }
 
-.tweets-to-delete .tweet {
-  display: inline-block;
-  margin: 0 20px 20px 0;
+.tweets .controls {
+  display: none;
+  position: fixed;
+  bottom: 10px;
+  z-index: 999;
+  height: 100px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  padding: 20px;
 }
 
-.pagination {
-  text-align: center;
-  margin: 30px 0;
+.tweets .controls .filter {
+  margin: 0 0 10px 0;
 }
 
-.pagination .item {
-  padding: 5px 10px;
-  margin: 10px;
+.tweets .controls .filter input {
+  width: 600px;
+  padding: 5px;
   font-size: 1.2em;
-  color: #034b9e;
-  cursor: pointer;
+}
+
+.tweets .controls .info {
+  margin: 0 0 10px 0;
+  color: #666666;
+  font-size: 0.8em;
+}
+
+.tweets .controls .pagination {
+  margin: 15px 0 0 0;
+}
+
+.tweets .controls .pagination .pagination-item {
+  padding: 5px 10px;
+  margin: 0 5px 0 0;
+  font-size: 1em;
   border: 1px solid #999999;
 }
 
-.pagination .item-current {
+.tweets .pagination .pagination-item a {
+  text-decoration: none;
+  color: #034b9e;
+}
+
+.tweets .controls .pagination .pagination-item-current {
   color: #000000;
   font-weight: bold;
-  cursor: auto;
   border: 0;
+}
+
+.tweets .tweets-to-delete {
+  padding-bottom: 130px;
+}
+
+.tweets .tweets-to-delete .tweet {
+  display: inline-block;
+  margin: 0 20px 20px 0;
 }

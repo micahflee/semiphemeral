@@ -3,9 +3,17 @@
 {% block header_text %}Semiphemeral Tweets{% endblock %}
 {% block content %}
 
-<div class="info"></div>
-<div class="tweets-to-delete"></div>
-<div class="pagination"></div>
+<div class="tweets">
+  <div class="controls">
+    <div class="filter">
+      <input placeholder="Filter" type="text" />
+    </div>
+    <div class="info"></div>
+    <div class="pagination"></div>
+  </div>
+
+  <div class="tweets-to-delete"></div>
+</div>
 
 <script sync src="https://platform.twitter.com/widgets.js"></script>
 <script src="/static/js/tweets.js"></script>
