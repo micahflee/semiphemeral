@@ -1,6 +1,6 @@
 import datetime
 import json
-from flask import Flask, request, render_template, jsonify, abort
+from flask import Flask, request, render_template, jsonify, abort, redirect
 
 from .db import Tweet, Thread
 from .twitter import Twitter
@@ -11,7 +11,7 @@ def create_app(settings, session):
 
     @app.route("/")
     def index():
-        return render_template('index.html')
+        return redirect('/settings')
 
     @app.route("/settings", methods=['GET', 'POST'])
     def edit_settings():
