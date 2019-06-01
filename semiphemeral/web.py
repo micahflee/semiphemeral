@@ -1,6 +1,6 @@
 import datetime
 import json
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, abort
 
 from .db import Tweet, Thread
 from .twitter import Twitter
@@ -132,7 +132,6 @@ def create_app(settings, session):
             .filter(Tweet.user_id == int(settings.get('user_id'))) \
             .filter(Tweet.is_deleted == 0) \
             .filter(Tweet.is_retweet == 0) \
-            .filter(Tweet.exclude_from_delete == 0) \
             .filter(Tweet.created_at < datetime_threshold) \
             .filter(Tweet.retweet_count < settings.get('tweets_retweet_threshold')) \
             .filter(Tweet.favorite_count < settings.get('tweets_like_threshold')) \
@@ -147,5 +146,21 @@ def create_app(settings, session):
                 }
 
         return jsonify(tweets_to_delete)
+
+    @app.route("/api/exclude/<int:status_id>/<int:exclude_from_delete>", methods=['POST'])
+    def api_exclude(status_id, exclude_from_delete):
+        if exclude_from_delete == 1:
+            exclude_from_delete = True
+        else:
+            exclude_from_delete = False
+
+        tweet = session.query(Tweet).filter_by(status_id=status_id).first()
+        if not tweet:
+            abort(400)
+
+        tweet.exclude_from_delete = exclude_from_delete
+        session.add(tweet)
+        session.commit()
+        return jsonify(True)
 
     return app

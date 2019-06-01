@@ -6,12 +6,34 @@ $(function(){
   }
 
   function toggle_exclude(id, excluded) {
-    console.log('toggle_exclude, id='+id+', exluded='+excluded);
-    if(excluded) {
-      $('#toggle-exclude-label-'+id).addClass('excluded').text('Excluded from deletion');
-    } else {
-      $('#toggle-exclude-label-'+id).removeClass('excluded').text('Staged for deletion');
+    function update_text(excluded) {
+      if(excluded) {
+        $('#toggle-exclude-label-'+id).addClass('excluded').text('Excluded from deletion');
+      } else {
+        $('#toggle-exclude-label-'+id).removeClass('excluded').text('Staged for deletion');
+      }
     }
+
+    // If excluded is the same as we already know, just update the text
+    if(window.semiphemeral.tweets[id].excluded == excluded) {
+      update_text(excluded);
+      return;
+    }
+
+    // Otherwise make ajax request
+    $('#toggle-exclude-label-'+id).removeClass('excluded').text('Saving...');
+    var exclude_from_delete = (excluded ? 1 : 0);
+    $.ajax('/api/exclude/'+id+'/'+exclude_from_delete, {
+      method: 'POST',
+      success: function() {
+        // Update the tweets, and the text
+        window.semiphemeral.tweets[id].excluded = excluded;
+        update_text(excluded);
+      },
+      error: function() {
+        alert('API error');
+      }
+    });
   }
 
   function display_tweets() {
@@ -81,6 +103,7 @@ $(function(){
         .append(
           $('<label/>')
             .append($('<input type="checkbox">')
+              .prop('id', 'toggle-exclude-checkbox-'+ids[i])
               .data('tweet-id', ids[i])
               .change(function(){
                 toggle_exclude($(this).data('tweet-id'), this.checked);
@@ -92,7 +115,12 @@ $(function(){
       var $tweet = $('<div/>').addClass('tweet').append($info).append($embed);
 
       $('.tweets-to-delete').append($tweet);
+
+      // Set the text and checkbox initially
       toggle_exclude(ids[i], window.semiphemeral.tweets[ids[i]].excluded);
+      if(window.semiphemeral.tweets[ids[i]].excluded) {
+        $('#toggle-exclude-checkbox-'+ids[i]).prop('checked', true);
+      }
 
       twttr.widgets.createTweet(ids[i], $('#tweet-'+ids[i])[0], {
         'dnt': true
