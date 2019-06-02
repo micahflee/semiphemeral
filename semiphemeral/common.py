@@ -1,3 +1,8 @@
+import datetime
+
+from .db import Tweet, Thread
+
+
 class Common:
     def __init__(self, settings, session):
         self.settings = settings
@@ -31,3 +36,36 @@ class Common:
             'other_tweets': other_tweets,
             'threads': threads
         }
+
+    def get_tweets_to_delete(self):
+        """
+        Returns a list of Tweet objects for tweets that should be deleted based on criteria in settings
+        """
+        self.settings.load()
+        datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.settings.get('tweets_days_threshold'))
+
+        # Select tweets from threads to exclude
+        tweets_to_exclude = []
+        threads = self.session.query(Thread) \
+            .filter(Thread.should_exclude == True) \
+            .all()
+        for thread in threads:
+            for tweet in thread.tweets:
+                if tweet.user_id == self.settings.get('user_id'):
+                    tweets_to_exclude.append(tweet.status_id)
+
+        # Select tweets that we will delete
+        tweets_to_delete = []
+        tweets = self.session.query(Tweet) \
+            .filter(Tweet.user_id == int(self.settings.get('user_id'))) \
+            .filter(Tweet.is_deleted == 0) \
+            .filter(Tweet.is_retweet == 0) \
+            .filter(Tweet.created_at < datetime_threshold) \
+            .filter(Tweet.retweet_count < self.settings.get('tweets_retweet_threshold')) \
+            .filter(Tweet.favorite_count < self.settings.get('tweets_like_threshold')) \
+            .all()
+        for tweet in tweets:
+            if tweet.status_id not in tweets_to_exclude:
+                tweets_to_delete.append(tweet)
+
+        return tweets_to_delete

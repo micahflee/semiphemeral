@@ -87,39 +87,17 @@ def create_app(common):
         """
         This returns a dictionary of status_ids mapped to the text of all tweets that should be deleted
         """
-        common.settings.load()
-        datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=common.settings.get('tweets_days_threshold'))
+        tweets_to_delete = common.get_tweets_to_delete()
 
-        # Select tweets from threads to exclude
-        tweets_to_exclude = []
-        threads = common.session.query(Thread) \
-            .filter(Thread.should_exclude == True) \
-            .all()
-        for thread in threads:
-            for tweet in thread.tweets:
-                if tweet.user_id == common.settings.get('user_id'):
-                    tweets_to_exclude.append(tweet.status_id)
-
-        # Select tweets that we will delete
-        tweets_to_delete = {}
-        tweets = common.session.query(Tweet) \
-            .filter(Tweet.user_id == int(common.settings.get('user_id'))) \
-            .filter(Tweet.is_deleted == 0) \
-            .filter(Tweet.is_retweet == 0) \
-            .filter(Tweet.created_at < datetime_threshold) \
-            .filter(Tweet.retweet_count < common.settings.get('tweets_retweet_threshold')) \
-            .filter(Tweet.favorite_count < common.settings.get('tweets_like_threshold')) \
-            .all()
-        for tweet in tweets:
-            if tweet.status_id not in tweets_to_exclude:
-                tweets_to_delete[tweet.status_id] = {
-                    'text': tweet.text,
-                    'retweets': tweet.retweet_count,
-                    'likes': tweet.favorite_count,
-                    'excluded': tweet.exclude_from_delete
-                }
-
-        return jsonify(tweets_to_delete)
+        ret = {}
+        for tweet in tweets_to_delete:
+            ret[tweet.status_id] = {
+                'text': tweet.text,
+                'retweets': tweet.retweet_count,
+                'likes': tweet.favorite_count,
+                'excluded': tweet.exclude_from_delete
+            }
+        return jsonify(ret)
 
     @app.route("/api/exclude/<int:status_id>/<int:exclude_from_delete>", methods=['POST'])
     def api_exclude(status_id, exclude_from_delete):
