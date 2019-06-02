@@ -236,10 +236,17 @@ class Twitter(object):
 
                 count = 0
                 for tweet in tweets:
-                    self.api.destroy_status(tweet.status_id)
-                    tweet.unretweet_summarize()
-                    tweet.is_deleted = True
-                    self.common.session.add(tweet)
+                    try:
+                        self.api.destroy_status(tweet.status_id)
+                        tweet.unretweet_summarize()
+                        tweet.is_deleted = True
+                        self.common.session.add(tweet)
+                    except tweepy.error.TweepError as e:
+                        if e.api_code == 144:
+                            tweet.is_deleted = True
+                            self.common.session.add(tweet)
+                        else:
+                            click.echo('Error for tweet {}: {}'.format(tweet.status_id, e))
 
                     count += 1
                     if count % 20 == 0:
