@@ -280,6 +280,19 @@ class Twitter(object):
         # Deleting tweets
         if self.settings.get('delete_tweets'):
             datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.settings.get('tweets_days_threshold'))
+
+            # Select tweets from threads to exclude
+            tweets_to_exclude = []
+            threads = self.session.query(Thread) \
+                .filter(Thread.should_exclude == True) \
+                .all()
+            for thread in threads:
+                for tweet in thread.tweets:
+                    if tweet.user_id == settings.get('user_id'):
+                        tweets_to_exclude.append(tweet.status_id)
+
+            # Select all tweets to delete
+            tweets_to_delete = []
             tweets = self.session.query(Tweet) \
                 .filter(Tweet.user_id == int(self.settings.get('user_id'))) \
                 .filter(Tweet.is_deleted == 0) \
@@ -290,13 +303,17 @@ class Twitter(object):
                 .filter(Tweet.exclude_from_delete == False) \
                 .order_by(Tweet.created_at) \
                 .all()
+            for tweet in tweets:
+                if tweet.status_id not in tweets_to_exclude:
+                    tweets_to_delete.append(tweet.status_id)
 
-            click.secho('Deleting {} tweets, starting with the earliest'.format(len(tweets)), fg='cyan')
+            click.secho('Deleting {} tweets, starting with the earliest'.format(len(tweets_to_delete)), fg='cyan')
             click.echo('(not implemented yet)')
 
             count = 0
-            for tweet in tweets:
-                #self.api.destroy_status(tweet.status_id)
+            for status_id in tweets_to_delete:
+                #self.api.destroy_status(status_id)
+                tweet = session.query(Tweet).filter_by(status_id=status_id).first()
                 tweet.delete_summarize()
                 #tweet.is_deleted = True
                 #self.session.add(tweet)
