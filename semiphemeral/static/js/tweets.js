@@ -51,7 +51,7 @@ $(function(){
       ids = [];
       for(var i=0; i<window.semiphemeral.ids.length; i++) {
         var id = window.semiphemeral.ids[i];
-        if(window.semiphemeral.tweets[id].text.includes(q)) {
+        if(window.semiphemeral.tweets[id].text.toLowerCase().includes(q.toLowerCase())) {
           ids.push(id);
         }
       }
