@@ -122,11 +122,11 @@ class Twitter(object):
                 id=self.settings.get('username'),
                 since_id=like_since_id
             ).pages():
-                # Import these tweets, and all their threads
+                # Import these tweets
                 for status in page:
                     tweet = Tweet(status)
                     if not tweet.already_saved(self.session):
-                        tweet.summarize()
+                        tweet.fetch_summarize()
                         self.session.add(tweet)
                 # Commit a page of tweets at a time
                 self.session.commit()
@@ -164,7 +164,7 @@ class Twitter(object):
 
         # Save the tweet, if it's not already saved
         if not tweet.already_saved(self.session):
-            tweet.summarize()
+            tweet.fetch_summarize()
             fetched_count += 1
             self.session.add(tweet)
 
@@ -211,4 +211,101 @@ class Twitter(object):
         if not self.authenticated:
             return
 
-        click.echo('Not implemented yet')
+        # First, run fetch
+        click.secho('Before deleting anything, fetch', fg='cyan')
+        #self.fetch()
+
+        # Unretweet and unlike tweets
+        if self.settings.get('retweets_likes'):
+            # Unretweet
+            if self.settings.get('retweets_likes_delete_retweets'):
+                datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.settings.get('retweets_likes_retweets_threshold'))
+                tweets = self.session.query(Tweet) \
+                    .filter(Tweet.user_id == int(self.settings.get('user_id'))) \
+                    .filter(Tweet.is_deleted == 0) \
+                    .filter(Tweet.is_retweet == 1) \
+                    .filter(Tweet.created_at < datetime_threshold) \
+                    .order_by(Tweet.created_at) \
+                    .all()
+
+                click.secho('Deleting {} retweets, starting with the earliest'.format(len(tweets)), fg='cyan')
+                click.echo('(not implemented yet)')
+
+                count = 0
+                for tweet in tweets:
+                    #self.api.destroy_status(tweet.status_id)
+                    tweet.unretweet_summarize()
+                    #tweet.is_deleted = True
+                    #self.session.add(tweet)
+
+                    count += 1
+                    if count % 20 == 0:
+                        self.session.commit()
+
+                    if count == 2:
+                        break
+
+                self.session.commit()
+
+            # Unlike
+            if self.settings.get('retweets_likes_delete_likes'):
+                datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.settings.get('retweets_likes_likes_threshold'))
+                tweets = self.session.query(Tweet) \
+                    .filter(Tweet.user_id != int(self.settings.get('user_id'))) \
+                    .filter(Tweet.is_unliked == 0) \
+                    .filter(Tweet.favorited == True) \
+                    .filter(Tweet.created_at < datetime_threshold) \
+                    .order_by(Tweet.created_at) \
+                    .all()
+
+                click.secho('Unliking {} tweets, starting with the earliest'.format(len(tweets)), fg='cyan')
+                click.echo('(not implemented yet)')
+
+                count = 0
+                for tweet in tweets:
+                    #self.api.destroy_favorite(tweet.status_id)
+                    tweet.unlike_summarize()
+                    #tweet.is_unliked = True
+                    #self.session.add(tweet)
+
+                    count += 1
+                    if count % 20 == 0:
+                        self.session.commit()
+
+                    if count == 2:
+                        break
+
+                self.session.commit()
+
+        # Deleting tweets
+        if self.settings.get('delete_tweets'):
+            datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.settings.get('tweets_days_threshold'))
+            tweets = self.session.query(Tweet) \
+                .filter(Tweet.user_id == int(self.settings.get('user_id'))) \
+                .filter(Tweet.is_deleted == 0) \
+                .filter(Tweet.is_retweet == 0) \
+                .filter(Tweet.created_at < datetime_threshold) \
+                .filter(Tweet.retweet_count < self.settings.get('tweets_retweet_threshold')) \
+                .filter(Tweet.favorite_count < self.settings.get('tweets_like_threshold')) \
+                .filter(Tweet.exclude_from_delete == False) \
+                .order_by(Tweet.created_at) \
+                .all()
+
+            click.secho('Deleting {} tweets, starting with the earliest'.format(len(tweets)), fg='cyan')
+            click.echo('(not implemented yet)')
+
+            count = 0
+            for tweet in tweets:
+                #self.api.destroy_status(tweet.status_id)
+                tweet.delete_summarize()
+                #tweet.is_deleted = True
+                #self.session.add(tweet)
+
+                count += 1
+                if count % 20 == 0:
+                    self.session.commit()
+
+                if count == 2:
+                    break
+
+            self.session.commit()

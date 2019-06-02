@@ -53,7 +53,7 @@ class Tweet(Base):
         self.user_id = status.author.id
         self.user_screen_name = status.author.screen_name
         self.status_id = status.id
-        self.lang =status.lang
+        self.lang = status.lang
         self.source = status.source
         self.source_url = status.source_url
         self.text = status.text
@@ -81,12 +81,30 @@ class Tweet(Base):
                 self.status_id), dim=True)
             return True
 
-    def summarize(self):
-        click.echo('Fetched {} @{}, id={}'.format(
-            self.created_at.strftime('%Y-%m-%d'),
-            self.user_screen_name,
-            self.status_id))
+    def fetch_summarize(self):
+        click.echo('Fetched {}'.format(self.summarize_string()))
 
+    def unretweet_summarize(self):
+        click.echo('Unretweeted {}'.format(self.summarize_string(True)))
+
+    def unlike_summarize(self):
+        click.echo('Unliked {}'.format(self.summarize_string()))
+
+    def delete_summarize(self):
+        click.echo('Deleted {}'.format(self.summarize_string()))
+
+    def summarize_string(self, include_rt_user=False):
+        if include_rt_user:
+            return '{} @{} {}, id={}'.format(
+                self.created_at.strftime('%Y-%m-%d'),
+                self.user_screen_name,
+                self.text.split(':')[0],
+                self.status_id)
+        else:
+            return '{} @{}, id={}'.format(
+                self.created_at.strftime('%Y-%m-%d'),
+                self.user_screen_name,
+                self.status_id)
 
 def create_db(database_path):
     engine = create_engine('sqlite:///{}'.format(database_path))
