@@ -217,7 +217,7 @@ class Twitter(object):
 
         # First, run fetch
         click.secho('Before deleting anything, fetch', fg='cyan')
-        #self.fetch()
+        self.fetch()
 
         # Unretweet and unlike tweets
         if self.common.settings.get('retweets_likes'):
@@ -233,21 +233,17 @@ class Twitter(object):
                     .all()
 
                 click.secho('Deleting {} retweets, starting with the earliest'.format(len(tweets)), fg='cyan')
-                click.echo('(not implemented yet)')
 
                 count = 0
                 for tweet in tweets:
-                    #self.api.destroy_status(tweet.status_id)
+                    self.api.destroy_status(tweet.status_id)
                     tweet.unretweet_summarize()
-                    #tweet.is_deleted = True
-                    #self.common.session.add(tweet)
+                    tweet.is_deleted = True
+                    self.common.session.add(tweet)
 
                     count += 1
                     if count % 20 == 0:
                         self.common.session.commit()
-
-                    if count == 2:
-                        break
 
                 self.common.session.commit()
 
