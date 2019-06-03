@@ -243,6 +243,7 @@ class Twitter(object):
                         self.common.session.add(tweet)
                     except tweepy.error.TweepError as e:
                         if e.api_code == 144:
+                            click.echo('Error, retweet {} is already deleted, updating database'.format(tweet.status_id))
                             tweet.is_deleted = True
                             self.common.session.add(tweet)
                         else:
@@ -259,28 +260,32 @@ class Twitter(object):
                 datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.common.settings.get('retweets_likes_likes_threshold'))
                 tweets = self.common.session.query(Tweet) \
                     .filter(Tweet.user_id != int(self.common.settings.get('user_id'))) \
-                    .filter(Tweet.is_unliked == 0) \
+                    .filter(Tweet.is_unliked == False) \
                     .filter(Tweet.favorited == True) \
                     .filter(Tweet.created_at < datetime_threshold) \
                     .order_by(Tweet.created_at) \
                     .all()
 
                 click.secho('Unliking {} tweets, starting with the earliest'.format(len(tweets)), fg='cyan')
-                click.echo('(not implemented yet)')
 
                 count = 0
                 for tweet in tweets:
-                    #self.api.destroy_favorite(tweet.status_id)
-                    tweet.unlike_summarize()
-                    #tweet.is_unliked = True
-                    #self.common.session.add(tweet)
+                    try:
+                        self.api.destroy_favorite(tweet.status_id)
+                        tweet.unlike_summarize()
+                        tweet.is_unliked = True
+                        self.common.session.add(tweet)
+                    except tweepy.error.TweepError as e:
+                        if e.api_code == 144:
+                            click.echo('Error, tweet {} is already unliked, updating database'.format(tweet.status_id))
+                            tweet.is_unliked = True
+                            self.common.session.add(tweet)
+                        else:
+                            click.echo('Error for tweet {}: {}'.format(tweet.status_id, e))
 
                     count += 1
                     if count % 20 == 0:
                         self.common.session.commit()
-
-                    if count == 2:
-                        break
 
                 self.common.session.commit()
 
