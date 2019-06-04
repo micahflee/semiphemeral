@@ -170,7 +170,9 @@ $(function(){
     $('.filter input').change(function(){
       var q = $(this).val();
       console.log('filtering on', q);
-      change_state(q, window.semiphemeral.state.page, window.semiphemeral.state.count);
+      if(q != window.semiphemeral.state.count) {
+        change_state(q, 0, window.semiphemeral.state.count);
+      }
     });
 
     // Display tweets
