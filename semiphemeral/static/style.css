@@ -113,10 +113,18 @@ body {
   font-size: 1.2em;
 }
 
+.tweets .controls .options {
+  margin: 0 20px 10px 0;
+  color: #666666;
+  font-size: 0.8em;
+  display: inline-block;
+}
+
 .tweets .controls .info {
   margin: 0 0 10px 0;
   color: #666666;
   font-size: 0.8em;
+  display: inline-block;
 }
 
 .tweets .controls .pagination {

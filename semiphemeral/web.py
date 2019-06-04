@@ -91,10 +91,16 @@ def create_app(common):
 
         ret = {}
         for tweet in tweets_to_delete:
+            if tweet.in_reply_to_status_id:
+                is_reply = True
+            else:
+                is_reply = False
+
             ret[tweet.status_id] = {
                 'text': tweet.text,
                 'retweets': tweet.retweet_count,
                 'likes': tweet.favorite_count,
+                'is_reply': is_reply,
                 'excluded': tweet.exclude_from_delete
             }
         return jsonify(ret)

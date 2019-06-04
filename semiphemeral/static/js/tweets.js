@@ -1,7 +1,7 @@
 $(function(){
 
-  function change_state(q, page, count) {
-    var new_state = { q:q, page:page, count:count };
+  function change_state(q, page, count, replies) {
+    var new_state = { q:q, page:page, count:count, replies:replies };
     window.location = '#'+JSON.stringify(new_state);
   }
 
@@ -42,17 +42,15 @@ $(function(){
     var q = window.semiphemeral.state.q;
     var page = window.semiphemeral.state.page;
     var count = window.semiphemeral.state.count;
+    var replies = window.semiphemeral.state.replies;
 
     // Build list of ids to filter
-    var ids;
-    if(q == "") {
-      ids = window.semiphemeral.ids;
-    } else {
-      ids = [];
-      for(var i=0; i<window.semiphemeral.ids.length; i++) {
-        var id = window.semiphemeral.ids[i];
-        if(window.semiphemeral.tweets[id].text.toLowerCase().includes(q.toLowerCase())) {
-          ids.push(id);
+    var ids = [];
+    for(var i=0; i<window.semiphemeral.ids.length; i++) {
+      var id = window.semiphemeral.ids[i];
+      if(window.semiphemeral.tweets[id].text.toLowerCase().includes(q.toLowerCase())) {
+        if(replies || (!replies && !window.semiphemeral.tweets[id].is_reply)) {
+            ids.push(id);
         }
       }
     }
@@ -152,6 +150,7 @@ $(function(){
         var hash = decodeURIComponent(window.location.hash).substr(1);
         window.semiphemeral.state = JSON.parse(hash);
         $('.filter input').val(window.semiphemeral.state.q);
+        $('.options input').prop('checked', window.semiphemeral.state.replies);
       } catch {
         console.log('parsing hash failed', hash);
         return false;
@@ -171,13 +170,22 @@ $(function(){
       var q = $(this).val();
       console.log('filtering on', q);
       if(q != window.semiphemeral.state.count) {
-        change_state(q, 0, window.semiphemeral.state.count);
+        change_state(q, 0, window.semiphemeral.state.count, window.semiphemeral.state.replies);
+      }
+    });
+
+    // Toggling show replies
+    $('.options input').change(function(){
+      var replies = $('.options input').prop('checked') ? true : false;
+      console.log('show replies', replies);
+      if(replies != window.semiphemeral.state.replies) {
+        change_state(window.semiphemeral.state.q, 0, window.semiphemeral.state.count, replies);
       }
     });
 
     // Display tweets
     if(!parse_hash()) {
-      change_state("", 0, 50);
+      change_state("", 0, 50, true);
     }
   })
 })
