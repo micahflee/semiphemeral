@@ -6,6 +6,12 @@ Semiphemeral does this, but also lets you automatically exclude tweets based on 
 
 ~~It can also automatically delete your old direct messages.~~ (DM support is currently [broken](https://github.com/tweepy/tweepy/issues/1081) in tweepy, I'm gonna wait until it's fixed first.)
 
+## Installation
+
+```
+pip3 install semiphemeral
+```
+
 ## How it works
 
 Semiphemeral is a command line tool that you run locally on your computer, or on a server.
