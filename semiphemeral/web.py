@@ -87,7 +87,7 @@ def create_app(common):
         """
         This returns a dictionary of status_ids mapped to the text of all tweets that should be deleted
         """
-        tweets_to_delete = common.get_tweets_to_delete()
+        tweets_to_delete = common.get_tweets_to_delete(include_excluded=True)
 
         ret = {}
         for tweet in tweets_to_delete:

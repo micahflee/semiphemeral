@@ -294,7 +294,6 @@ class Twitter(object):
             tweets_to_delete = common.get_tweets_to_delete()
 
             click.secho('Deleting {} tweets, starting with the earliest'.format(len(tweets_to_delete)), fg='cyan')
-            click.echo('(not implemented yet)')
 
             count = 0
             for tweet in tweets_to_delete:

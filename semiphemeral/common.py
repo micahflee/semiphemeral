@@ -37,9 +37,11 @@ class Common:
             'threads': threads
         }
 
-    def get_tweets_to_delete(self):
+    def get_tweets_to_delete(self, include_excluded=False):
         """
-        Returns a list of Tweet objects for tweets that should be deleted based on criteria in settings
+        Returns a list of Tweet objects for tweets that should be deleted based
+        on criteria in settings. This list includes tweets where exclude_from_delete=True,
+        so it's important to manually exclude those before deleting
         """
         self.settings.load()
         datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.settings.get('tweets_days_threshold'))
@@ -56,14 +58,19 @@ class Common:
 
         # Select tweets that we will delete
         tweets_to_delete = []
-        tweets = self.session.query(Tweet) \
+        q = self.session.query(Tweet) \
             .filter(Tweet.user_id == int(self.settings.get('user_id'))) \
             .filter(Tweet.is_deleted == 0) \
             .filter(Tweet.is_retweet == 0) \
             .filter(Tweet.created_at < datetime_threshold) \
             .filter(Tweet.retweet_count < self.settings.get('tweets_retweet_threshold')) \
-            .filter(Tweet.favorite_count < self.settings.get('tweets_like_threshold')) \
-            .all()
+            .filter(Tweet.favorite_count < self.settings.get('tweets_like_threshold'))
+
+        # Should we also filter out exclude_from_delete?
+        if not include_excluded:
+            q = q.filter(Tweet.exclude_from_delete != True)
+
+        tweets = q.all()
         for tweet in tweets:
             if tweet.status_id not in tweets_to_exclude:
                 tweets_to_delete.append(tweet)
