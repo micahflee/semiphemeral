@@ -35,6 +35,8 @@ class Twitter(object):
         self.last_fetch_format = '%Y-%m-%d %I:%M%p'
 
     def stats(self):
+        if not self.common.settings.is_configured():
+            return
         click.secho('Statistics', fg='cyan')
         stats = self.common.get_stats()
         click.echo(json.dumps(stats, indent=2))
