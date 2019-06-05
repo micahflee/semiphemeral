@@ -10,13 +10,7 @@ from .twitter import Twitter
 version = '0.1'
 
 
-@click.command()
-@click.option('--configure', is_flag=True, help='Start the web server to configure semiphemeral')
-@click.option('--stats', is_flag=True, help='Show stats about tweets in the database')
-@click.option('--fetch', is_flag=True, help='Download all tweets')
-@click.option('--delete', is_flag=True, help='Delete tweets that aren\'t automatically or manually excluded')
-@click.option('--debug', is_flag=True, help='Start web server in debug mode')
-def main(configure, stats, fetch, delete, debug):
+def init():
     click.echo(click.style("semiphemeral {}".format(version), fg='yellow'))
 
     # Initialize stuff
@@ -25,27 +19,42 @@ def main(configure, stats, fetch, delete, debug):
     session = create_db(os.path.expanduser('~/.semiphemeral/tweets.db'))
 
     common = Common(settings, session)
+    return common
 
-    if configure:
-        click.echo('Load this website in a browser to configure semiphemeral, and press Ctrl-C when done')
-        click.echo('http://127.0.0.1:8080')
-        click.echo('')
-        app = create_app(common)
-        app.run(host='127.0.0.1', port=8080, threaded=False, debug=debug)
 
-    elif stats:
-        t = Twitter(common)
-        t.stats()
+@click.group()
+def main():
+    """Automatically delete your old tweets, except for the ones you want to keep"""
 
-    elif fetch:
-        t = Twitter(common)
-        if settings.is_configured():
-            t.fetch()
 
-    elif delete:
-        t = Twitter(common)
-        if settings.is_configured():
-            t.delete()
+@main.command('configure', short_help='Start the web server to configure semiphemeral')
+def configure(debug=False):
+    common = init()
+    click.echo('Load this website in a browser to configure semiphemeral, and press Ctrl-C when done')
+    click.echo('http://127.0.0.1:8080')
+    click.echo('')
+    app = create_app(common)
+    app.run(host='127.0.0.1', port=8080, threaded=False)
 
-    else:
-        click.echo('You must choose either --configure, --fetch, or --delete')
+
+@main.command('stats', short_help='Show stats about tweets in the database')
+def stats():
+    common = init()
+    t = Twitter(common)
+    t.stats()
+
+
+@main.command('fetch', short_help='Download all tweets')
+def fetch():
+    common = init()
+    t = Twitter(common)
+    if common.settings.is_configured():
+        t.fetch()
+
+
+@main.command('delete', short_help='Delete tweets that aren\'t automatically or manually excluded')
+def delete():
+    common = init()
+    t = Twitter(common)
+    if common.settings.is_configured():
+        t.delete()
