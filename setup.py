@@ -15,6 +15,12 @@ setuptools.setup(
     license="MIT",
     url="https://github.com/micahflee/semiphemeral",
     packages=['semiphemeral'],
+    package_data={'semiphemeral': [
+        'templates/*',
+        'static/*',
+        'static/img/*',
+        'static/js/*'
+    ]},
     classifiers=(
         "Development Status :: 2 - Pre-Alpha",
         "Environment :: Console",
