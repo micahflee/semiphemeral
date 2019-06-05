@@ -129,7 +129,7 @@ class Twitter(object):
                 # Import these tweets
                 for status in page:
                     tweet = Tweet(status)
-                    if not tweet.already_saved(self.session):
+                    if not tweet.already_saved(self.common.session):
                         tweet.fetch_summarize()
                         self.common.session.add(tweet)
                 # Commit a page of tweets at a time
@@ -167,7 +167,7 @@ class Twitter(object):
         fetched_count = 0
 
         # Save the tweet, if it's not already saved
-        if not tweet.already_saved(self.session):
+        if not tweet.already_saved(self.common.session):
             tweet.fetch_summarize()
             fetched_count += 1
             self.common.session.add(tweet)
@@ -291,22 +291,27 @@ class Twitter(object):
 
         # Deleting tweets
         if self.common.settings.get('delete_tweets'):
-            tweets_to_delete = common.get_tweets_to_delete()
+            tweets_to_delete = self.common.get_tweets_to_delete()
 
             click.secho('Deleting {} tweets, starting with the earliest'.format(len(tweets_to_delete)), fg='cyan')
 
             count = 0
             for tweet in tweets_to_delete:
-                #self.api.destroy_status(tweet.status_id)
-                tweet.delete_summarize()
-                #tweet.is_deleted = True
-                #self.common.session.add(tweet)
+                try:
+                    self.api.destroy_status(tweet.status_id)
+                    tweet.delete_summarize()
+                    tweet.is_deleted = True
+                    self.common.session.add(tweet)
+                except tweepy.error.TweepError as e:
+                    if e.api_code == 144:
+                        click.echo('Error, tweet {} is already deleted, updating database'.format(tweet.status_id))
+                        tweet.is_deleted = True
+                        self.common.session.add(tweet)
+                    else:
+                        click.echo('Error for tweet {}: {}'.format(tweet.status_id, e))
 
                 count += 1
                 if count % 20 == 0:
                     self.common.session.commit()
-
-                if count == 2:
-                    break
 
             self.common.session.commit()

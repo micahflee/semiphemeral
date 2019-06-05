@@ -70,6 +70,8 @@ class Common:
         if not include_excluded:
             q = q.filter(Tweet.exclude_from_delete != True)
 
+        q = q.order_by(Tweet.created_at)
+
         tweets = q.all()
         for tweet in tweets:
             if tweet.status_id not in tweets_to_exclude:
