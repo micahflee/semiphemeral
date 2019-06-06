@@ -44,17 +44,17 @@
       <legend>Tweets</legend>
       <p>
         Delete tweets older than
-        <input class="small" type="text" name="tweets_days_threshold" value="{{ tweets_days_threshold }}" \>
+        <input class="small" type="number" min="0"  name="tweets_days_threshold" value="{{ tweets_days_threshold }}" \>
         days
       </p>
       <p>
         Unless they have at least
-        <input class="small" type="text" name="tweets_retweet_threshold" value="{{ tweets_retweet_threshold }}" \>
+        <input class="small" type="number" min="0"  name="tweets_retweet_threshold" value="{{ tweets_retweet_threshold }}" \>
         retweets
       </p>
       <p>
         Or at least
-        <input class="small" type="text" name="tweets_like_threshold" value="{{ tweets_like_threshold }}" \>
+        <input class="small" type="number" min="0"  name="tweets_like_threshold" value="{{ tweets_like_threshold }}" \>
         likes
       </p>
       <p>
@@ -81,7 +81,7 @@
           Unretweet tweets
         </label>
         older than
-        <input class="small" type="text" name="retweets_likes_retweets_threshold" value="{{ retweets_likes_retweets_threshold }}" \>
+        <input class="small" type="number" min="0"  name="retweets_likes_retweets_threshold" value="{{ retweets_likes_retweets_threshold }}" \>
         days
       </p>
 
@@ -91,7 +91,7 @@
           Unlike tweets
         </label>
         older than
-        <input class="small" type="text" name="retweets_likes_likes_threshold" value="{{ retweets_likes_likes_threshold }}" \>
+        <input class="small" type="number" min="0"  name="retweets_likes_likes_threshold" value="{{ retweets_likes_likes_threshold }}" \>
         days
       </p>
 
