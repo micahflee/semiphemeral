@@ -7,7 +7,7 @@ from .db import create_db
 from .web import create_app
 from .twitter import Twitter
 
-version = '0.2'
+version = '0.3'
 
 
 def init():
