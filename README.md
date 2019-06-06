@@ -23,7 +23,7 @@ Semiphemeral is a command line tool that you run locally on your computer, or on
 
 ```
 $ semiphemeral
-Usage: app.py [OPTIONS] COMMAND [ARGS]...
+Usage: semiphemeral [OPTIONS] COMMAND [ARGS]...
 
   Automatically delete your old tweets, except for the ones you want to keep
 
