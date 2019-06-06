@@ -1,3 +1,5 @@
+![Logo](/img/logo-small.png)
+
 # Semiphemeral
 
 There are plenty of tools that let you make your Twitter feed ephemeral, automatically deleting tweets older than some threshold, like one month.
@@ -5,6 +7,9 @@ There are plenty of tools that let you make your Twitter feed ephemeral, automat
 Semiphemeral does this, but also lets you automatically exclude tweets based on criteria: how many RTs or likes they have, and if they're part of a thread where one of your tweets has that many RTs or likes. It also lets you manually select tweets you'd like to exclude from deleting.
 
 ~~It can also automatically delete your old direct messages.~~ (DM support is currently [broken](https://github.com/tweepy/tweepy/issues/1081) in tweepy, I'm gonna wait until it's fixed first.)
+
+_Read more in the blog post: [Semiphemeral: Automatically delete your old tweets, except for the ones you want to keep](https://micahflee.com/2019/06/semiphemeral-automatically-delete-your-old-tweets-except-for-the-ones-you-want-to-keep/)_
+
 
 ## Installation
 
@@ -34,11 +39,11 @@ Commands:
 
 Start by running `semiphemeral configure`, which starts a local web server at http://127.0.0.1:8080/. Load that website in a browser.
 
-You must supply Twitter API credentials here, which you can get by following [this guide](https://python-twitter.readthedocs.io/en/latest/getting_started.html) (basically, you need to login to https://developer.twitter.com/ and create a new "Twitter app" that only you will be using).
+You must supply Twitter API credentials here, which you can get by following [this guide](https://python-twitter.readthedocs.io/en/latest/getting_started.html). Basically, you need to login to https://developer.twitter.com/ and create a new "Twitter app" that only you will be using (when creating an app, you're welcome to use https://github.com/micahflee/semiphemeral as the website URL for your app).
 
 From the settings page you also tell semiphemeral which tweets to exclude from deletion:
 
-![Settings](/screenshots/settings.png)
+![Settings](/img/settings.png)
 
 Once you have configured semiphemeral, fetch all of the tweets from your account by running `semiphemeral fetch`. (It may take a long time if you have a lot of tweets -- when semiphemeral hits a Twitter rate limit, it just waits the shortest amount of time allowed until it can continue fetching.)
 
