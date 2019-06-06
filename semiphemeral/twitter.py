@@ -109,6 +109,7 @@ class Twitter(object):
                             click.echo('Added {} tweets to existing thread (root id={})'.format(count, root_status_id))
                     self.common.session.commit()
 
+        if self.common.settings.get('retweets_likes') and self.common.settings.get('retweets_likes_delete_likes'):
             # It appears that twitter will only return the last 4000 likes. So if
             # it's been over a day since the last fetch, try fetching all likes again
             like_since_id = since_id
