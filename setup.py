@@ -19,7 +19,8 @@ setuptools.setup(
         'templates/*',
         'static/*',
         'static/img/*',
-        'static/js/*'
+        'static/js/*',
+        'static/js/lib/*'
     ]},
     classifiers=(
         "Development Status :: 2 - Pre-Alpha",
