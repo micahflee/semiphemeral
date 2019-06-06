@@ -41,7 +41,8 @@ def configure(debug=False):
 def stats():
     common = init()
     t = Twitter(common)
-    t.stats()
+    if common.settings.is_configured():
+        t.stats()
 
 
 @main.command('fetch', short_help='Download all tweets')
