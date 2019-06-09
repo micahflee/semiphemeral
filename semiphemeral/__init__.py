@@ -28,13 +28,14 @@ def main():
 
 
 @main.command('configure', short_help='Start the web server to configure semiphemeral')
-def configure(debug=False):
+@click.option('--debug', is_flag=True, help='Start web server in debug mode')
+def configure(debug):
     common = init()
     click.echo('Load this website in a browser to configure semiphemeral, and press Ctrl-C when done')
     click.echo('http://127.0.0.1:8080')
     click.echo('')
     app = create_app(common)
-    app.run(host='127.0.0.1', port=8080, threaded=False)
+    app.run(host='127.0.0.1', port=8080, threaded=False, debug=debug)
 
 
 @main.command('stats', short_help='Show stats about tweets in the database')
