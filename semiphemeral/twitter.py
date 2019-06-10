@@ -370,12 +370,15 @@ class Twitter(object):
 
             tweet = self.common.session.query(Tweet).filter_by(status_id=status_id).first()
             if not tweet:
-                status = self.api.get_status(status_id)
-                tweet = Tweet(status)
-                if not tweet.already_saved(self.common.session):
-                    tweet.fetch_summarize()
-                    self.common.session.add(tweet)
-                    count += 1
+                try:
+                    status = self.api.get_status(status_id)
+                    tweet = Tweet(status)
+                    if not tweet.already_saved(self.common.session):
+                        tweet.fetch_summarize()
+                        self.common.session.add(tweet)
+                        count += 1
+                except tweepy.error.TweepError as e:
+                    click.secho('Error importing tweet {}: {}'.format(status_id, e), dim=True)
             tweets.append(tweet)
 
             if count % 20 == 0:
