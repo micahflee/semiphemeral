@@ -63,7 +63,7 @@ class Twitter(object):
 
                 # Import these tweets, and all their threads
                 for status in page:
-                    fetched_count += self.import_tweet(Tweet(status))
+                    fetched_count += self.import_tweet_and_thread(Tweet(status))
 
                     # Only commit every 20 tweets
                     if fetched_count % 20 == 0:
@@ -162,7 +162,7 @@ class Twitter(object):
             return [status_id]
         return self.calculate_thread(tweet.in_reply_to_status_id) + [status_id]
 
-    def import_tweet(self, tweet):
+    def import_tweet_and_thread(self, tweet):
         """
         This imports a tweet, and recursively imports all tweets that it's in reply to,
         and returns the number of tweets fetched
@@ -183,7 +183,7 @@ class Twitter(object):
                 # If not, import it
                 try:
                     status = self.api.get_status(tweet.in_reply_to_status_id)
-                    fetched_count += self.import_tweet(Tweet(status))
+                    fetched_count += self.import_tweet_and_thread(Tweet(status))
                 except tweepy.error.TweepError:
                     # If it's been deleted, ignore
                     pass
@@ -360,3 +360,31 @@ class Twitter(object):
 
         if not self.authenticated:
             return
+
+        # Import all of the liked tweets
+        click.secho('Importing {} liked tweets'.format(len(likes)), fg='cyan')
+        tweets = []
+        count = 0
+        for obj in likes:
+            status_id = obj['like']['tweetId']
+
+            tweet = self.common.session.query(Tweet).filter_by(status_id=status_id).first()
+            if not tweet:
+                status = self.api.get_status(status_id)
+                tweet = Tweet(status)
+                if not tweet.already_saved(self.common.session):
+                    tweet.fetch_summarize()
+                    self.common.session.add(tweet)
+                    count += 1
+            tweets.append(tweet)
+
+            if count % 20 == 0:
+                self.common.session.commit()
+        self.common.session.commit()
+
+        # How many tweets are favorited?
+        num_favorited = 0
+        for tweet in tweets:
+            if tweet.favorited:
+                num_favorited += 1
+        click.echo('{} tweets, {} likes'.format(len(tweets), num_favorited))
