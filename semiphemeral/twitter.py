@@ -366,25 +366,32 @@ class Twitter(object):
         if not click.confirm('Do you want to continue?'):
             return
 
+        # Make a list of all status_ids, to avoid re-fetching tweets we already have
+        click.secho('Compiling a list of tweets we already fetched'.format(len(likes)), fg='cyan')
+        all_status_ids = []
+        for tweet in self.common.session.query(Tweet).all():
+            all_status_ids.append(tweet.status_id)
+
         # Import all of the liked tweets
         click.secho('Importing {} liked tweets'.format(len(likes)), fg='cyan')
         tweets = []
         count = 0
         for obj in likes:
-            status_id = obj['like']['tweetId']
+            status_id = int(obj['like']['tweetId'])
 
-            tweet = self.common.session.query(Tweet).filter_by(status_id=status_id).first()
-            if not tweet:
-                try:
-                    status = self.api.get_status(status_id)
-                    tweet = Tweet(status)
-                    if not tweet.already_saved(self.common.session):
-                        tweet.fetch_summarize()
-                        self.common.session.add(tweet)
-                        count += 1
-                except tweepy.error.TweepError as e:
-                    click.secho('Error importing tweet {}: {}'.format(status_id, e), dim=True)
-            tweets.append(tweet)
+            if not self.common.settings.unlike_should_ignore(status_id):
+                if status_id not in all_status_ids:
+                    try:
+                        status = self.api.get_status(status_id)
+                        tweet = Tweet(status)
+                        if not tweet.already_saved(self.common.session):
+                            tweet.fetch_summarize()
+                            self.common.session.add(tweet)
+                            count += 1
+                    except tweepy.error.TweepError as e:
+                        click.secho('Error importing tweet {}: {}'.format(status_id, e), dim=True)
+                        self.common.settings.unlike_ignore(status_id)
+                tweets.append(tweet)
 
             if count % 20 == 0:
                 self.common.session.commit()

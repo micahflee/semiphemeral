@@ -71,6 +71,8 @@ semiphemeral unlike --filename ~/Downloads/twitter-2019-06-07-8195574bc935602c00
 
 Your filename will be different than this one, so make sure you update the command to match it.
 
+_**WARNING: Don't automate this command.** Pay close attention when you run this command, and after it completes successfully don't run it again. Otherwise you'll relike and unlike all of these tweets over again. If it fails in the middle of the like/unlike process, then download a new copy of your Twitter data and run it again using the new `like.js` instead._
+
 First this will fetch all of the old tweets you liked a long time ago, relike them, and then unlike them again. Every relike will cause a notification, but at the end of the process your likes will have actually been deleted.
 
 New likes don't have this problem, so as long as you regularly run `semiphemeral delete`, your new likes will automatically get deleted.
