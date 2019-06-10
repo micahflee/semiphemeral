@@ -61,13 +61,19 @@ Settings are stored in `~/.semiphemeral/settings.json`. All tweets (including ex
 
 The Twitter API is only willing to tell you about your last 4000 likes. If you've already tried to fetch and delete your likes, but still have a lot of old likes, you can use semiphemeral to automate unliking them.
 
-In order to get a list of all of your old likes, you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your likes). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `like.js`. Run this command, with the path to your `like.js`, for example:
+_**WARNING: One does not simply unlike old tweets.** According to the Twitter API, you didn't like these old tweets, so you can't unlike them -- even though they're listed in your like history. The only way to remove them from your like history is to LIKE THEM AGAIN, and then you can unlike them. This is very noisy. Every time you re-like a tweet, the user will get a notification._
+
+In order to get a list of all of your old likes (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your likes). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `like.js`. Run this command, with the path to your `like.js`, for example:
 
 ```sh
 semiphemeral unlike --filename ~/Downloads/twitter-2019-06-07-8195574bc935602c0056aee12fb11de78553835ace755eb782c895283f7fa14e/like.js
 ```
 
 Your filename will be different than this one, so make sure you update the command to match it.
+
+First this will fetch all of the old tweets you liked a long time ago, relike them, and then unlike them again. Every relike will cause a notification, but at the end of the process your likes will have actually been deleted.
+
+New likes don't have this problem, so as long as you regularly run `semiphemeral delete`, your new likes will automatically get deleted.
 
 ## Development
 
