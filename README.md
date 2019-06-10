@@ -57,6 +57,18 @@ After you have manually deleted once, you can automatically delete your old twee
 
 Settings are stored in `~/.semiphemeral/settings.json`. All tweets (including exceptions, and deleted tweets) are stored in a sqlite database `~/.semiphemeral/tweets.db`.
 
+## Deleting old likes
+
+The Twitter API is only willing to tell you about your last 4000 likes. If you've already tried to fetch and delete your likes, but still have a lot of old likes, you can use semiphemeral to automate unliking them.
+
+In order to get a list of all of your old likes, you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your likes). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `like.js`. Run this command, with the path to your `like.js`, for example:
+
+```sh
+semiphemeral unlike --filename ~/Downloads/twitter-2019-06-07-8195574bc935602c0056aee12fb11de78553835ace755eb782c895283f7fa14e/like.js
+```
+
+Your filename will be different than this one, so make sure you update the command to match it.
+
 ## Development
 
 Make sure you have [pipenv](https://pipenv.readthedocs.io/en/latest/). Then install dependencies:

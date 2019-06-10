@@ -2,6 +2,8 @@ import tweepy
 import click
 import json
 import datetime
+import os
+import json
 
 from .db import Tweet, Thread
 
@@ -316,3 +318,45 @@ class Twitter(object):
                     self.common.session.commit()
 
             self.common.session.commit()
+
+    def unlike(self, filename):
+        # Validate filename
+        filename = os.path.abspath(filename)
+        if not os.path.isfile(filename):
+            click.echo('Invalid file')
+            return
+        if os.path.basename(filename) != 'like.js':
+            click.echo('File should be called like.js')
+            return
+
+        # Validate file format
+        with open(filename) as f:
+            expected_start = 'window.YTD.like.part0 = '
+            js_string = f.read()
+            if not js_string.startswith(expected_start):
+                click.echo("File expected to start with: `window.YTD.like.part0 = `")
+                return
+            json_string = js_string[len(expected_start):]
+            try:
+                likes = json.loads(json_string)
+            except:
+                click.echo("Failed parsing JSON object")
+                return
+            if type(likes) != list:
+                click.echo("JSON object expected to be a list")
+                return
+
+            for obj in likes:
+                if type(obj) != dict:
+                    click.echo("JSON object expected to be a list of dicts")
+                    return
+                if 'like' not in obj:
+                    click.echo("JSON object expected to be a list of dicts that contain 'like' fields")
+                    return
+                like = obj['like']
+                if 'tweetId' not in like:
+                    click.echo("JSON object expected to be a list of dicts that contain 'like' fields that contain 'tweetID' fields")
+                    return
+
+        if not self.authenticated:
+            return
