@@ -90,6 +90,9 @@ class Tweet(Base):
     def unlike_summarize(self):
         click.echo('Unliked {}'.format(self.summarize_string()))
 
+    def relike_unlike_summarize(self):
+        click.echo('Reliked and unliked {}'.format(self.summarize_string()))
+
     def delete_summarize(self):
         click.echo('Deleted {}'.format(self.summarize_string()))
 

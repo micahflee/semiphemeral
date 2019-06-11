@@ -366,40 +366,85 @@ class Twitter(object):
         if not click.confirm('Do you want to continue?'):
             return
 
-        # Make a list of all status_ids, to avoid re-fetching tweets we already have
-        click.secho('Compiling a list of tweets we already fetched'.format(len(likes)), fg='cyan')
-        all_status_ids = []
-        for tweet in self.common.session.query(Tweet).all():
-            all_status_ids.append(tweet.status_id)
-
-        # Import all of the liked tweets
-        click.secho('Importing {} liked tweets'.format(len(likes)), fg='cyan')
-        tweets = []
-        count = 0
+        # Make a list of liked tweet status_ids
+        click.secho('Making a list of liked tweet status_ids'.format(len(likes)), fg='cyan')
+        like_status_ids = []
         for obj in likes:
             status_id = int(obj['like']['tweetId'])
-
             if not self.common.settings.unlike_should_ignore(status_id):
-                if status_id not in all_status_ids:
-                    try:
-                        status = self.api.get_status(status_id)
-                        tweet = Tweet(status)
-                        if not tweet.already_saved(self.common.session):
-                            tweet.fetch_summarize()
-                            self.common.session.add(tweet)
-                            count += 1
-                    except tweepy.error.TweepError as e:
-                        click.secho('Error importing tweet {}: {}'.format(status_id, e), dim=True)
-                        self.common.settings.unlike_ignore(status_id)
+                like_status_ids.append(status_id)
+        click.secho('Like history has {} tweets'.format(len(like_status_ids)), fg='cyan')
+
+        datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.common.settings.get('retweets_likes_likes_threshold'))
+        tweets = []
+
+        # Load tweets from db first
+        click.secho('Loading tweets from database', fg='cyan')
+        loaded_status_ids = []
+        for tweet in self.common.session.query(Tweet).filter(Tweet.status_id.in_(like_status_ids)).order_by(Tweet.created_at.desc()).all():
+            if tweet.created_at < datetime_threshold:
                 tweets.append(tweet)
+            loaded_status_ids.append(tweet.status_id)
+        click.secho('Loaded {} tweets from database'.format(len(tweets)), fg='cyan')
+
+        click.secho('Calculating tweets to fetch from the API', fg='cyan')
+        remaining_status_ids = []
+        for status_id in like_status_ids:
+            if status_id not in loaded_status_ids:
+                remaining_status_ids.append(status_id)
+
+        # Fetch remaining tweets
+        click.secho('Fetching remaining {} tweets from API'.format(len(remaining_status_ids)), fg='cyan')
+        count = 0
+        for status_id in remaining_status_ids:
+            try:
+                status = self.api.get_status(status_id)
+                tweet = Tweet(status)
+                if not tweet.already_saved(self.common.session):
+                    tweet.fetch_summarize()
+                    self.common.session.add(tweet)
+                    count += 1
+
+                    if tweet.created_at < datetime_threshold:
+                        tweets.append(tweet)
+            except tweepy.error.TweepError as e:
+                click.secho('Error importing tweet {}: {}'.format(status_id, e), dim=True)
+                self.common.settings.unlike_ignore(status_id)
 
             if count % 20 == 0:
                 self.common.session.commit()
+
         self.common.session.commit()
 
-        # How many tweets are favorited?
-        num_favorited = 0
+        # Unlike and like each tweet
+        click.secho('Re-liking and unliking {} liked tweets'.format(len(tweets)), fg='cyan')
+        count = 0
         for tweet in tweets:
-            if tweet.favorited:
-                num_favorited += 1
-        click.echo('{} tweets, {} likes'.format(len(tweets), num_favorited))
+            if tweet.created_at < datetime_threshold and not tweet.is_unliked:
+                if tweet.favorited:
+                    try:
+                        self.api.destroy_favorite(tweet.status_id)
+                    except tweepy.error.TweepError as e:
+                        click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                    tweet.unlike_summarize()
+                    tweet.is_unliked = True
+                    self.common.session.add(tweet)
+                else:
+                    try:
+                        self.api.create_favorite(tweet.status_id)
+                    except tweepy.error.TweepError as e:
+                        click.secho('Error liking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                    try:
+                        self.api.destroy_favorite(tweet.status_id)
+                    except tweepy.error.TweepError as e:
+                        click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                    tweet.relike_unlike_summarize()
+                    tweet.is_unliked = True
+                    self.common.session.add(tweet)
+
+                count += 1
+
+            if count % 20 == 0:
+                self.common.session.commit()
+
+        self.common.session.commit()
