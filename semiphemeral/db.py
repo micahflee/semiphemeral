@@ -93,6 +93,12 @@ class Tweet(Base):
     def delete_summarize(self):
         click.echo('Deleted {}'.format(self.summarize_string()))
 
+    def excluded_summarize(self):
+        click.echo('Excluded from deletion {}'.format(self.summarize_string()))
+
+    def excluded_fetch_summarize(self):
+        click.echo('Fetched and excluded from deletion {}'.format(self.summarize_string()))
+
     def summarize_string(self, include_rt_user=False):
         if include_rt_user:
             return '{} @{} {}, id={}'.format(

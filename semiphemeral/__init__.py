@@ -75,3 +75,7 @@ def excluded_export(filename):
 @click.option('--filename', required=True, help='Input JSON file that contains a list of tweet status_ids')
 def excluded_import(filename):
     common = init()
+    t = Twitter(common)
+    if common.settings.is_configured():
+        ie = ImportExport(common, t)
+        ie.excluded_import(filename)
