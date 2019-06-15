@@ -6,6 +6,7 @@ from .settings import Settings
 from .db import create_db
 from .web import create_app
 from .twitter import Twitter
+from .import_export import ImportExport
 
 version = '0.3'
 
@@ -60,3 +61,21 @@ def delete():
     t = Twitter(common)
     if common.settings.is_configured():
         t.delete()
+
+
+@main.command('excluded_export', short_help='Export tweets excluded that are excluded from deletion')
+@click.option('--filename', required=True, help='Output JSON file to save a list of tweet status_ids')
+def excluded_export(filename):
+    common = init()
+    ie = ImportExport(common)
+    ie.excluded_export(filename)
+
+
+@main.command('excluded_import', short_help='Import tweets excluded that are excluded from deletion')
+@click.option('--filename', required=True, help='Input JSON file that contains a list of tweet status_ids')
+def excluded_import(filename):
+    common = init()
+    t = Twitter(common)
+    if common.settings.is_configured():
+        ie = ImportExport(common, t)
+        ie.excluded_import(filename)
