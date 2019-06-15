@@ -424,25 +424,29 @@ class Twitter(object):
                 if tweet.favorited:
                     try:
                         self.api.destroy_favorite(tweet.status_id)
+                        tweet.unlike_summarize()
+                        tweet.is_unliked = True
+                        self.common.session.add(tweet)
                     except tweepy.error.TweepError as e:
                         click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
-                    tweet.unlike_summarize()
-                    tweet.is_unliked = True
-                    self.common.session.add(tweet)
                 else:
                     try:
                         self.api.create_favorite(tweet.status_id)
+                        try:
+                            self.api.destroy_favorite(tweet.status_id)
+                            tweet.relike_unlike_summarize()
+                            tweet.is_unliked = True
+                            self.common.session.add(tweet)
+                        except tweepy.error.TweepError as e:
+                            click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
                     except tweepy.error.TweepError as e:
                         click.secho('Error liking tweet {}: {}'.format(tweet.status_id, e), dim=True)
-                    try:
-                        self.api.destroy_favorite(tweet.status_id)
-                    except tweepy.error.TweepError as e:
-                        click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
-                    tweet.relike_unlike_summarize()
-                    tweet.is_unliked = True
-                    self.common.session.add(tweet)
 
                 count += 1
+
+            if count >= 100:
+                self.common.session.commit()
+                return
 
             if count % 20 == 0:
                 self.common.session.commit()
