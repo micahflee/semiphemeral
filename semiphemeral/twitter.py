@@ -420,7 +420,10 @@ class Twitter(object):
                         tweet.is_unliked = True
                         self.common.session.add(tweet)
                     except tweepy.error.TweepError as e:
-                        click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                        if 'status code = 429' in str(e) and e.api_code == None:
+                            click.secho('Hitting a strange rate limit-related error, skipping for now {}: {}'.format(tweet.status_id, e), dim=True)
+                        else:
+                            click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
                 else:
                     try:
                         self.api.create_favorite(tweet.status_id)
@@ -430,15 +433,17 @@ class Twitter(object):
                             tweet.is_unliked = True
                             self.common.session.add(tweet)
                         except tweepy.error.TweepError as e:
-                            click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                            if 'status code = 429' in str(e) and e.api_code == None:
+                                click.secho('Hitting a strange rate limit-related error, skipping for now {}: {}'.format(tweet.status_id, e), dim=True)
+                            else:
+                                click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
                     except tweepy.error.TweepError as e:
-                        click.secho('Error liking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                        if 'status code = 429' in str(e) and e.api_code == None:
+                            click.secho('Hitting a strange rate limit-related error, skipping for now {}: {}'.format(tweet.status_id, e), dim=True)
+                        else:
+                            click.secho('Error liking tweet {}: {}'.format(tweet.status_id, e), dim=True)
 
                 count += 1
-
-            if count >= 100:
-                self.common.session.commit()
-                return
 
             if count % 20 == 0:
                 self.common.session.commit()
