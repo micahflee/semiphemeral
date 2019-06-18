@@ -112,15 +112,7 @@ class Twitter(object):
                     self.common.session.commit()
 
         if self.common.settings.get('retweets_likes') and self.common.settings.get('retweets_likes_delete_likes'):
-            # It appears that twitter will only return the last 4000 likes. So if
-            # it's been over a day since the last fetch, try fetching all likes again
             like_since_id = self.common.settings.get('since_id')
-            last_fetch_str = self.common.settings.get('last_fetch')
-            if last_fetch_str:
-                last_fetch = datetime.datetime.strptime(last_fetch_str, self.last_fetch_format)
-                now = datetime.datetime.now()
-                if now - last_fetch > datetime.timedelta(days=1):
-                    like_since_id = None
 
             # Fetch tweets that are liked
             click.secho('Fetching tweets that you liked', fg='cyan')
