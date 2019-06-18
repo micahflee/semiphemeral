@@ -112,7 +112,7 @@ class Twitter(object):
         if self.common.settings.get('retweets_likes') and self.common.settings.get('retweets_likes_delete_likes'):
             # It appears that twitter will only return the last 4000 likes. So if
             # it's been over a day since the last fetch, try fetching all likes again
-            like_since_id = since_id
+            like_since_id = self.common.settings.get('since_id')
             last_fetch_str = self.common.settings.get('last_fetch')
             if last_fetch_str:
                 last_fetch = datetime.datetime.strptime(last_fetch_str, self.last_fetch_format)
