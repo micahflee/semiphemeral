@@ -471,7 +471,7 @@ class Twitter(object):
                             click.secho('Waiting 24 hours...', bold=True)
 
                             for hours_left in list(range(1, 25))[::-1]:
-                                click.secho('24 hours left')
+                                click.secho('{} hours left'.format(hours_left))
                                 time.sleep(3600)
 
                             click.secho('Waiting 2 more minutes, for good measure')
