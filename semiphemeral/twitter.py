@@ -4,6 +4,7 @@ import json
 import datetime
 import os
 import json
+import time
 
 from .db import Tweet, Thread
 
@@ -368,16 +369,16 @@ class Twitter(object):
         click.secho('Like history has {} tweets'.format(len(like_status_ids)), fg='cyan')
 
         datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.common.settings.get('retweets_likes_likes_threshold'))
-        tweets = []
+        all_tweets = []
 
         # Load tweets from db first
         click.secho('Loading tweets from database', fg='cyan')
         loaded_status_ids = []
         for tweet in self.common.session.query(Tweet).filter(Tweet.status_id.in_(like_status_ids)).order_by(Tweet.created_at.desc()).all():
             if tweet.created_at < datetime_threshold:
-                tweets.append(tweet)
+                all_tweets.append(tweet)
             loaded_status_ids.append(tweet.status_id)
-        click.secho('Loaded {} tweets from database'.format(len(tweets)), fg='cyan')
+        click.secho('Loaded {} tweets from database'.format(len(all_tweets)), fg='cyan')
 
         click.secho('Calculating tweets to fetch from the API', fg='cyan')
         remaining_status_ids = []
@@ -386,29 +387,55 @@ class Twitter(object):
                 remaining_status_ids.append(status_id)
 
         # Fetch remaining tweets
-        click.secho('Fetching remaining {} tweets from API'.format(len(remaining_status_ids)), fg='cyan')
-        count = 0
-        for status_id in remaining_status_ids:
-            try:
-                status = self.api.get_status(status_id)
-                tweet = Tweet(status)
-                if not tweet.already_saved(self.common.session):
-                    tweet.fetch_summarize()
-                    self.common.session.add(tweet)
-                    count += 1
+        if len(remaining_status_ids) > 0:
+            click.secho('Fetching remaining {} tweets from API'.format(len(remaining_status_ids)), fg='cyan')
+            count = 0
+            for status_id in remaining_status_ids:
+                try:
+                    status = self.api.get_status(status_id)
+                    tweet = Tweet(status)
+                    if not tweet.already_saved(self.common.session):
+                        tweet.fetch_summarize()
+                        self.common.session.add(tweet)
+                        count += 1
 
-                    if tweet.created_at < datetime_threshold:
-                        tweets.append(tweet)
-            except tweepy.error.TweepError as e:
-                click.secho('Error importing tweet {}: {}'.format(status_id, e), dim=True)
-                self.common.settings.unlike_ignore(status_id)
+                        if tweet.created_at < datetime_threshold:
+                            all_tweets.append(tweet)
+                except tweepy.error.TweepError as e:
+                    click.secho('Error importing tweet {}: {}'.format(status_id, e), dim=True)
+                    self.common.settings.unlike_ignore(status_id)
 
-            if count % 20 == 0:
-                self.common.session.commit()
+                if count % 20 == 0:
+                    self.common.session.commit()
 
-        self.common.session.commit()
+            self.common.session.commit()
 
-        # Unlike and like each tweet
+        # Figure out how many tweets we actually need to relike
+        click.secho('Calculating how many tweets to re-like and unlike', fg='cyan')
+        tweets = []
+        for tweet in all_tweets:
+            if tweet.created_at < datetime_threshold and not tweet.is_unliked:
+                if tweet.favorited:
+                    try:
+                        self.api.destroy_favorite(tweet.status_id)
+                        tweet.unlike_summarize()
+                        tweet.is_unliked = True
+                        self.common.session.add(tweet)
+                    except tweepy.error.TweepError as e:
+                        click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                else:
+                    tweets.append(tweet)
+
+        # Leftover tweets to re-like and unlike, that we do at the end because of hitting rate limits
+        self.extra_tweets = []
+
+        self.relike_unlike_tweets(datetime_threshold, tweets)
+        self.relike_unlike_tweets(datetime_threshold, extra_tweets)
+
+
+
+    def relike_unlike_tweets(self, datetime_threshold, tweets):
+        # Re-like and unlike each tweet
         click.secho('Re-liking and unliking {} liked tweets'.format(len(tweets)), fg='cyan')
         count = 0
         for tweet in tweets:
@@ -420,10 +447,7 @@ class Twitter(object):
                         tweet.is_unliked = True
                         self.common.session.add(tweet)
                     except tweepy.error.TweepError as e:
-                        if 'status code = 429' in str(e) and e.api_code == None:
-                            click.secho('Hitting a strange rate limit-related error, skipping for now {}: {}'.format(tweet.status_id, e), dim=True)
-                        else:
-                            click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                        click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
                 else:
                     try:
                         self.api.create_favorite(tweet.status_id)
@@ -433,15 +457,25 @@ class Twitter(object):
                             tweet.is_unliked = True
                             self.common.session.add(tweet)
                         except tweepy.error.TweepError as e:
-                            if 'status code = 429' in str(e) and e.api_code == None:
-                                click.secho('Hitting a strange rate limit-related error, skipping for now {}: {}'.format(tweet.status_id, e), dim=True)
-                            else:
-                                click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                            click.secho('Error unliking tweet {}: {}'.format(tweet.status_id, e), dim=True)
                     except tweepy.error.TweepError as e:
+                        click.secho('Error liking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+
                         if 'status code = 429' in str(e) and e.api_code == None:
-                            click.secho('Hitting a strange rate limit-related error, skipping for now {}: {}'.format(tweet.status_id, e), dim=True)
-                        else:
-                            click.secho('Error liking tweet {}: {}'.format(tweet.status_id, e), dim=True)
+                            self.common.session.commit()
+                            self.extra_tweets.append(tweet)
+
+                            click.secho('You can only like 1000 tweets per 24 hours and you have hit the limit', bold=True)
+                            click.echo('See: https://developer.twitter.com/en/docs/basics/rate-limits')
+                            click.echo('Current time: {}'.format(time.strftime('%b %d, %Y %l:%M%p %Z')))
+                            click.secho('Waiting 24 hours...', bold=True)
+
+                            for hours_left in list(range(1, 25))[::-1]:
+                                click.secho('24 hours left')
+                                time.sleep(3600)
+
+                            click.secho('Waiting 2 more minutes, for good measure')
+                            time.sleep(120)
 
                 count += 1
 
