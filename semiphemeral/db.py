@@ -56,7 +56,7 @@ class Tweet(Base):
         self.lang = status.lang
         self.source = status.source
         self.source_url = status.source_url
-        self.text = status.text
+        self.text = status.full_text
         self.in_reply_to_screen_name = status.in_reply_to_screen_name
         self.in_reply_to_status_id = status.in_reply_to_status_id
         self.in_reply_to_user_id = status.in_reply_to_user_id
