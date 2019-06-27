@@ -6,6 +6,7 @@ import os
 import json
 import time
 
+from tweepy.models import Status
 from .db import Tweet, Thread
 
 
@@ -29,7 +30,10 @@ class Twitter(object):
             self.common.settings.get("access_token_secret"),
         )
         self.api = tweepy.API(
-            auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, proxy=self.common.settings.get('proxy')
+            auth,
+            wait_on_rate_limit=True,
+            wait_on_rate_limit_notify=True,
+            proxy=self.common.settings.get("proxy"),
         )
 
         self.authenticated = True
@@ -678,7 +682,10 @@ class Twitter(object):
         if not os.path.isfile(filename):
             click.echo("Invalid file")
             return
-        if os.path.basename(filename) not in ("direct-messages.js", "direct-messages.js"):
+        if os.path.basename(filename) not in (
+            "direct-messages.js",
+            "direct-messages.js",
+        ):
             click.echo("File should be called direct-message.js or direct-messages.js")
             return
 
@@ -687,9 +694,7 @@ class Twitter(object):
             expected_start = "window.YTD.direct_message"
             js_string = f.read()
             if not js_string.startswith(expected_start):
-                click.echo(
-                    "File expected to start with: `window.YTD.direct_message`"
-                )
+                click.echo("File expected to start with: `window.YTD.direct_message`")
                 return
             json_string = js_string[len(expected_start) :]
             try:
@@ -755,3 +760,40 @@ class Twitter(object):
 
         click.secho("Deleted {} DMs".format(count), fg="cyan")
         self.common.log("Deleted {} DMs".format(count))
+
+    def import_dump(self, filepath):
+        if self.common.settings.get("delete_tweets"):
+            with open(os.path.join(filepath, "tweet.js"), "r", encoding="UTF-8") as f:
+                # Skip the JS variable assignment at the start of this file
+                f.read(25)
+                tweets = json.load(f)
+            click.echo("Importing {} tweets from {}".format(len(tweets), filepath))
+
+            current_user = self.api.me()
+
+            def parse_tweet(tweet):
+                """Parse a JSON tweet into a tweepy object and insert missing author."""
+                t = Status.parse(self.api, tweet)
+                t.author = current_user
+                return t
+
+            for offset in range(0, len(tweets), 500):
+                self.import_tweets(
+                    parse_tweet(t) for t in tweets[offset : offset + 500]
+                )
+
+        # All done, update the since_id
+        tweet = (
+            self.common.session.query(Tweet).order_by(Tweet.status_id.desc()).first()
+        )
+        if tweet:
+            self.common.settings.set("since_id", tweet.status_id)
+            self.common.settings.save()
+
+        # Calculate which threads should be excluded from deletion
+        self.calculate_excluded_threads()
+
+        self.common.settings.set(
+            "last_fetch", datetime.datetime.today().strftime(self.last_fetch_format)
+        )
+        self.common.settings.save()
