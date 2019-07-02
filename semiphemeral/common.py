@@ -7,21 +7,31 @@ class Common:
     def __init__(self, settings, session):
         self.settings = settings
         self.session = session
+        self.KEYBASE_PROOF_TWEET_EXCERPT = "Verifying myself: I am"
 
     def get_stats(self):
         self.settings.load()
 
         is_configured = self.settings.is_configured()
         last_fetch = self.settings.get('last_fetch')
-        my_tweets = self.session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=0'.format(int(self.settings.get('user_id')))).first()[0]
-        my_retweets = self.session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=1'.format(int(self.settings.get('user_id')))).first()[0]
-        my_likes = self.session.execute('SELECT COUNT(*) FROM tweets WHERE favorited=1').first()[0]
-        deleted_tweets = self.session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=0'.format(int(self.settings.get('user_id')))).first()[0]
-        deleted_retweets = self.session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=1'.format(int(self.settings.get('user_id')))).first()[0]
-        unliked_tweets = self.session.execute('SELECT COUNT(*) FROM tweets WHERE favorited=1 AND is_unliked=1').first()[0]
-        excluded_tweets = self.session.execute('SELECT COUNT(*) FROM tweets WHERE user_id={} AND exclude_from_delete=1'.format(int(self.settings.get('user_id')))).first()[0]
-        other_tweets = self.session.execute('SELECT COUNT(*) FROM tweets WHERE user_id!={}'.format(int(self.settings.get('user_id')))).first()[0]
-        threads = self.session.execute('SELECT COUNT(*) FROM threads').first()[0]
+        my_tweets = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=0'.format(int(self.settings.get('user_id')))).first()[0]
+        my_retweets = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=1'.format(int(self.settings.get('user_id')))).first()[0]
+        my_likes = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE favorited=1').first()[0]
+        deleted_tweets = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=0'.format(int(self.settings.get('user_id')))).first()[0]
+        deleted_retweets = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=1'.format(int(self.settings.get('user_id')))).first()[0]
+        unliked_tweets = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE favorited=1 AND is_unliked=1').first()[0]
+        excluded_tweets = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE user_id={} AND exclude_from_delete=1'.format(int(self.settings.get('user_id')))).first()[0]
+        other_tweets = self.session.execute(
+            'SELECT COUNT(*) FROM tweets WHERE user_id!={}'.format(int(self.settings.get('user_id')))).first()[0]
+        threads = self.session.execute(
+            'SELECT COUNT(*) FROM threads').first()[0]
 
         return {
             'is_configured': is_configured,
@@ -44,7 +54,8 @@ class Common:
         so it's important to manually exclude those before deleting
         """
         self.settings.load()
-        datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.settings.get('tweets_days_threshold'))
+        datetime_threshold = datetime.datetime.utcnow(
+        ) - datetime.timedelta(days=self.settings.get('tweets_days_threshold'))
 
         # Select tweets from threads to exclude
         tweets_to_exclude = []
@@ -64,7 +75,8 @@ class Common:
             .filter(Tweet.is_retweet == 0) \
             .filter(Tweet.created_at < datetime_threshold) \
             .filter(Tweet.retweet_count < self.settings.get('tweets_retweet_threshold')) \
-            .filter(Tweet.favorite_count < self.settings.get('tweets_like_threshold'))
+            .filter(Tweet.favorite_count < self.settings.get('tweets_like_threshold')) \
+            .filter(~Tweet.text.contains(self.KEYBASE_PROOF_TWEET_EXCERPT))
 
         # Should we also filter out exclude_from_delete?
         if not include_excluded:
