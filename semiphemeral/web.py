@@ -24,6 +24,14 @@ def create_app(common):
             common.settings.set('access_token_secret', request.form['access_token_secret'])
             common.settings.set('username', request.form['username'])
 
+            if 'log_to_file' in request.form:
+                common.settings.set(
+                    'logging', request.form['log_to_file'] == 'on')
+            else:
+                common.settings.set('logging', False)
+            common.settings.set('log_filename', request.form['log_filename'])
+            common.settings.set('log_format', request.form['log_format'])
+
             if 'delete_tweets' in request.form:
                 common.settings.set('delete_tweets', request.form['delete_tweets'] == 'on')
             else:
@@ -63,6 +71,9 @@ def create_app(common):
             access_token_key=common.settings.get('access_token_key'),
             access_token_secret=common.settings.get('access_token_secret'),
             username=common.settings.get('username'),
+            log_to_file=common.settings.get('logging'),
+            log_filename=common.settings.get('log_filename'),
+            log_format=common.settings.get('log_format'),
             delete_tweets=common.settings.get('delete_tweets'),
             tweets_days_threshold=common.settings.get('tweets_days_threshold'),
             tweets_retweet_threshold=common.settings.get('tweets_retweet_threshold'),

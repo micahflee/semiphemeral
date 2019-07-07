@@ -2,11 +2,20 @@ import datetime
 
 from .db import Tweet, Thread
 
+import logging
 
 class Common:
     def __init__(self, settings, session):
         self.settings = settings
         self.session = session
+
+        self.logger = logging.getLogger("semiphemeral-log")
+        self.logger.setLevel(logging.INFO)
+        handler = logging.FileHandler(self.settings.get('log_filename'))
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter(self.settings.get('log_format'))
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
 
     def get_stats(self):
         self.settings.load()
@@ -78,3 +87,6 @@ class Common:
                 tweets_to_delete.append(tweet)
 
         return tweets_to_delete
+    def logToFile(self, message):
+        if self.settings.get("logging"):
+            self.logger.info(message)
