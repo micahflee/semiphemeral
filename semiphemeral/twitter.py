@@ -430,7 +430,7 @@ class Twitter(object):
         self.extra_tweets = []
 
         self.relike_unlike_tweets(datetime_threshold, tweets)
-        self.relike_unlike_tweets(datetime_threshold, extra_tweets)
+        self.relike_unlike_tweets(datetime_threshold, self.extra_tweets)
 
 
 
