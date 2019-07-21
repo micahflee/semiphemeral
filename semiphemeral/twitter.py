@@ -58,7 +58,8 @@ class Twitter(object):
             for page in tweepy.Cursor(
                 self.api.user_timeline,
                 id=self.common.settings.get('username'),
-                since_id=since_id
+                since_id=since_id,
+                tweet_mode='extended'
             ).pages():
                 fetched_count = 0
 
@@ -120,7 +121,8 @@ class Twitter(object):
             for page in tweepy.Cursor(
                 self.api.favorites,
                 id=self.common.settings.get('username'),
-                since_id=like_since_id
+                since_id=like_since_id,
+                tweet_mode='extended'
             ).pages():
                 # Import these tweets
                 for status in page:
@@ -175,7 +177,8 @@ class Twitter(object):
             if not parent_tweet:
                 # If not, import it
                 try:
-                    status = self.api.get_status(tweet.in_reply_to_status_id)
+
+                    status = self.api.get_status(tweet.in_reply_to_status_id, tweet_mode='extended')
                     fetched_count += self.import_tweet_and_thread(Tweet(status))
                 except tweepy.error.TweepError:
                     # If it's been deleted, ignore
