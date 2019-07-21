@@ -3,7 +3,10 @@
 ## 0.4
 
 * Feature: Support for unliking old tweets that the Twitter API doesn't make easy, by reliking/unliking them all
-* Feature: Add --debug option
+* Feature: Add support for logging events to file
+* Feature: Add `configure --debug` option
+* Feature: Add `configure --port` option
+* Bugfix: Fetches 240 character tweets, instead of just the first 140 characters
 
 ## 0.3
 
