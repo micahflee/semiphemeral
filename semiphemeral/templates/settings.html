@@ -34,10 +34,12 @@
     </ul>
     
     <p>
-    <input type="checkbox" class="log-to-file-checkbox" name="log_to_file" {%if log_to_file %}checked="checked" {% endif %} />
-    Log events (last_fetch, deleted tweets/RTs/favorites) to a file</label>
+      <label class="checkbox">
+        <input type="checkbox" class="log-to-file-checkbox" name="log_to_file" {%if log_to_file %}checked="checked" {% endif %} />
+        Log events (last_fetch, deleted tweets/RTs/favorites) to a file
+      </label>
     </p>
-    <fieldset class="delete-tweets-fieldset">
+    <fieldset class="log-to-file-fieldset">
       <legend>Logging</legend>
       <p>
         <label for="log_filename">Log file name: </label>
