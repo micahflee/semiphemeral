@@ -143,8 +143,9 @@ class Twitter(object):
         self.calculate_excluded_threads()
 
         self.common.settings.set('last_fetch', datetime.datetime.today().strftime(self.last_fetch_format))
-        self.common.logToFile('last_fetch: %s' % datetime.datetime.today().strftime(self.last_fetch_format))
         self.common.settings.save()
+
+        self.common.log('last_fetch: %s' % datetime.datetime.today().strftime(self.last_fetch_format))
 
     def calculate_thread(self, status_id):
         """
@@ -252,8 +253,9 @@ class Twitter(object):
                     count += 1
                     if count % 20 == 0:
                         self.common.session.commit()
-                self.common.logToFile("Deleted %s retweets" % count)
+
                 self.common.session.commit()
+                self.common.log("Deleted %s retweets" % count)
 
             # Unlike
             if self.common.settings.get('retweets_likes_delete_likes'):
@@ -286,8 +288,9 @@ class Twitter(object):
                     count += 1
                     if count % 20 == 0:
                         self.common.session.commit()
-                self.common.logToFile("Deleted %s likes" % count)
+
                 self.common.session.commit()
+                self.common.log("Unliked %s tweets" % count)
 
         # Deleting tweets
         if self.common.settings.get('delete_tweets'):
@@ -313,8 +316,9 @@ class Twitter(object):
                 count += 1
                 if count % 20 == 0:
                     self.common.session.commit()
-            self.common.logToFile("Deleted %s own-tweets" % count)
+
             self.common.session.commit()
+            self.common.log("Deleted %s tweets" % count)
 
     def unlike(self, filename):
         # Validate filename
@@ -487,3 +491,4 @@ class Twitter(object):
                 self.common.session.commit()
 
         self.common.session.commit()
+        self.common.log("Reliked and unliked %s tweets" % count)

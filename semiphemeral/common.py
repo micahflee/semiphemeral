@@ -87,6 +87,7 @@ class Common:
                 tweets_to_delete.append(tweet)
 
         return tweets_to_delete
-    def logToFile(self, message):
+
+    def log(self, message):
         if self.settings.get("logging"):
             self.logger.info(message)
