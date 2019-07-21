@@ -1,5 +1,10 @@
 # Semiphemeral Changelog
 
+## 0.4
+
+* Feature: Support for unliking old tweets that the Twitter API doesn't make easy, by reliking/unliking them all
+* Feature: Add --debug option
+
 ## 0.3
 
 * Bugfix: jQuery wasn't included in the PyPi package, so tweets page of configure web app was broken. jQuery is now included
