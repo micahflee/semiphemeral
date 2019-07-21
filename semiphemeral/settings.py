@@ -27,7 +27,10 @@ class Settings(object):
             'since_id': None,
             #'dms_since_id': None,
             'last_fetch': None,
-            'unlike_ignore_list': []
+            'unlike_ignore_list': [],
+            'logging': False,
+            'log_filename': '/tmp/semiphemeral.log',
+            'log_format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         }
         self.load()
 
