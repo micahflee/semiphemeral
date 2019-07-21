@@ -1,5 +1,6 @@
 import os
 import click
+import json
 
 from .common import Common
 from .settings import Settings
@@ -61,6 +62,16 @@ def delete():
     t = Twitter(common)
     if common.settings.is_configured():
         t.delete()
+
+
+@main.command('unlike', short_help='Delete old likes that aren\'t available through the Twitter API')
+@click.option('--filename', required=True, help='Path to like.js from Twitter data downloaded from https://twitter.com/settings/your_twitter_data')
+def unlike(filename):
+    common = init()
+
+    t = Twitter(common)
+    if common.settings.is_configured():
+        t.unlike(filename)
 
 
 @main.command('excluded_export', short_help='Export tweets excluded that are excluded from deletion')
