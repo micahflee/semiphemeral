@@ -400,7 +400,7 @@ class Twitter(object):
             count = 0
             for status_id in remaining_status_ids:
                 try:
-                    status = self.api.get_status(status_id)
+                    status = self.api.get_status(status_id, tweet_mode='extended')
                     tweet = Tweet(status)
                     if not tweet.already_saved(self.common.session):
                         tweet.fetch_summarize()
