@@ -59,6 +59,12 @@ def create_app(common):
                 common.settings.set('retweets_likes_delete_likes', False)
             common.settings.set('retweets_likes_likes_threshold', int(request.form['retweets_likes_likes_threshold']))
 
+            if 'delete_dms' in request.form:
+                common.settings.set('delete_dms', request.form['delete_dms'] == 'on')
+            else:
+                common.settings.set('delete_dms', False)
+            common.settings.set('dms_days_threshold', int(request.form['dms_days_threshold']))
+
             common.settings.save()
 
             # Recalculate excluded threads with these new settings
@@ -83,7 +89,9 @@ def create_app(common):
             retweets_likes_delete_retweets=common.settings.get('retweets_likes_delete_retweets'),
             retweets_likes_retweets_threshold=common.settings.get('retweets_likes_retweets_threshold'),
             retweets_likes_delete_likes=common.settings.get('retweets_likes_delete_likes'),
-            retweets_likes_likes_threshold=common.settings.get('retweets_likes_likes_threshold'))
+            retweets_likes_likes_threshold=common.settings.get('retweets_likes_likes_threshold'),
+            delete_dms=common.settings.get('delete_dms'),
+            dms_days_threshold=common.settings.get('dms_days_threshold'))
 
     @app.route("/tweets")
     def tweets():
