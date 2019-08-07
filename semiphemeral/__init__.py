@@ -49,7 +49,7 @@ def stats():
         t.stats()
 
 
-@main.command('fetch', short_help='Download all tweets')
+@main.command('fetch', short_help='Download all tweets/DMs')
 def fetch():
     common = init()
     t = Twitter(common)
@@ -57,7 +57,7 @@ def fetch():
         t.fetch()
 
 
-@main.command('delete', short_help='Delete tweets that aren\'t automatically or manually excluded')
+@main.command('delete', short_help='Delete tweets that aren\'t automatically or manually excluded, likes, and DMs')
 def delete():
     common = init()
     t = Twitter(common)

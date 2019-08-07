@@ -142,6 +142,20 @@ class Twitter(object):
         # Calculate which threads should be excluded from deletion
         self.calculate_excluded_threads()
 
+        if self.common.settings.get('delete_dms'):
+            # We fetch tweets since the last fetch (or all tweets, if it's None)
+            since_id = self.common.settings.get('dms_since_id')
+            if since_id:
+                click.secho('Fetching all recent direct messages', fg='cyan')
+            else:
+                click.secho('Fetching all direct messages, this first run may take a long time', fg='cyan')
+
+            # Fetch direct messages
+            # Sadly, only the last 30 days worth
+            # https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/list-events
+            for dm in self.api.list_direct_messages(count=50):
+                print(dm)
+
         self.common.settings.set('last_fetch', datetime.datetime.today().strftime(self.last_fetch_format))
         self.common.settings.save()
 
