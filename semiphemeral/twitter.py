@@ -510,3 +510,53 @@ class Twitter(object):
 
         self.common.session.commit()
         self.common.log("Reliked and unliked %s tweets" % count)
+
+
+    def delete_dms(self, filename):
+        # Validate filename
+        filename = os.path.abspath(filename)
+        if not os.path.isfile(filename):
+            click.echo('Invalid file')
+            return
+        if os.path.basename(filename) != 'direct-message.js':
+            click.echo('File should be called direct-message.js')
+            return
+
+        # Validate file format
+        with open(filename) as f:
+            expected_start = 'window.YTD.direct_message.part0 = '
+            js_string = f.read()
+            if not js_string.startswith(expected_start):
+                click.echo("File expected to start with: `window.YTD.direct_message.part0 = `")
+                return
+            json_string = js_string[len(expected_start):]
+            try:
+                conversations = json.loads(json_string)
+            except:
+                click.echo("Failed parsing JSON object")
+                return
+            if type(conversations) != list:
+                click.echo("JSON object expected to be a list")
+                return
+
+            for obj in conversations:
+                if type(obj) != dict:
+                    click.echo("JSON object expected to be a list of dicts")
+                    return
+                if 'dmConversation' not in obj:
+                    click.echo("JSON object expected to be a list of dicts that contain 'dmConversation' fields")
+                    return
+                dm_conversation = obj['dmConversation']
+                if 'messages' not in dm_conversation:
+                    click.echo("JSON object expected to be a list of dicts that contain 'dmConversations' fields that contain 'messages' fields")
+                    return
+
+        if not self.authenticated:
+            return
+
+        # Make a list of DM ids
+        dm_ids = []
+        for obj in conversations:
+            for message in obj['dmConversation']['messages']:
+                dm_ids.append(message['messageCreate']['id'])
+        click.secho('Loaded {} DMs from your twitter data'.format(len(dm_ids)), fg='cyan')

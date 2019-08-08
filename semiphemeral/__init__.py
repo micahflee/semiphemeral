@@ -75,6 +75,16 @@ def unlike(filename):
         t.unlike(filename)
 
 
+@main.command('delete_dms', short_help='Delete DMs that are older than 30 days')
+@click.option('--filename', required=True, help='Path to direct-message.js from Twitter data downloaded from https://twitter.com/settings/your_twitter_data')
+def delete_dms(filename):
+    common = init()
+
+    t = Twitter(common)
+    if common.settings.is_configured():
+        t.delete_dms(filename)
+
+
 @main.command('excluded_export', short_help='Export tweets excluded that are excluded from deletion')
 @click.option('--filename', required=True, help='Output JSON file to save a list of tweet status_ids')
 def excluded_export(filename):
