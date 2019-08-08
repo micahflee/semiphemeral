@@ -25,7 +25,6 @@ class Settings(object):
             'delete_dms': True,
             'dms_days_threshold': 14,
             'since_id': None,
-            'dms_since_id': None,
             'last_fetch': None,
             'unlike_ignore_list': [],
             'logging': False,

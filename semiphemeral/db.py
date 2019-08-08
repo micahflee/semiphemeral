@@ -115,6 +115,7 @@ class Tweet(Base):
                 self.user_screen_name,
                 self.status_id)
 
+
 def create_db(database_path):
     engine = create_engine('sqlite:///{}'.format(database_path))
 

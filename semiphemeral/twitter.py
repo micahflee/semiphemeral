@@ -142,20 +142,6 @@ class Twitter(object):
         # Calculate which threads should be excluded from deletion
         self.calculate_excluded_threads()
 
-        if self.common.settings.get('delete_dms'):
-            # We fetch tweets since the last fetch (or all tweets, if it's None)
-            since_id = self.common.settings.get('dms_since_id')
-            if since_id:
-                click.secho('Fetching all recent direct messages', fg='cyan')
-            else:
-                click.secho('Fetching all direct messages, this first run may take a long time', fg='cyan')
-
-            # Fetch direct messages
-            # Sadly, only the last 30 days worth
-            # https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/list-events
-            for dm in self.api.list_direct_messages(count=50):
-                print(dm)
-
         self.common.settings.set('last_fetch', datetime.datetime.today().strftime(self.last_fetch_format))
         self.common.settings.save()
 
@@ -333,6 +319,24 @@ class Twitter(object):
 
             self.common.session.commit()
             self.common.log("Deleted %s tweets" % count)
+
+        if self.common.settings.get('delete_dms'):
+            datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.common.settings.get('dms_days_threshold'))
+
+            # Sadly, only the last 30 days worth
+            # https://developer.twitter.com/en/docs/direct-messages/sending-and-receiving/api-reference/list-events
+            click.secho('Fetching direct message metadata for the last 30 days', fg='cyan')
+
+            # Fetch direct messages
+            count = 0
+            for dm in self.api.list_direct_messages(count=50):
+                created_timestamp = datetime.datetime.fromtimestamp(int(dm.created_timestamp) / 1000)
+                if created_timestamp <= datetime_threshold:
+                    self.api.destroy_direct_message(dm.id)
+                    click.echo('Deleted DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm.id))
+                    count += 1
+
+            self.common.log("Deleted %s DMs" % count)
 
     def unlike(self, filename):
         # Validate filename
