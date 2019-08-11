@@ -558,5 +558,25 @@ class Twitter(object):
         dm_ids = []
         for obj in conversations:
             for message in obj['dmConversation']['messages']:
-                dm_ids.append(message['messageCreate']['id'])
+                dm_ids.append(int(message['messageCreate']['id']))
         click.secho('Loaded {} DMs from your twitter data'.format(len(dm_ids)), fg='cyan')
+
+        # Fetching all of these DMs from Twitter, and delete them if they're older than the threshold
+        count = 0
+        datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.common.settings.get('dms_days_threshold'))
+        for id in dm_ids:
+            try:
+                dm = self.api.get_direct_message(id)
+                created_timestamp = datetime.datetime.fromtimestamp(int(dm.created_timestamp) / 1000)
+                click.echo('Fetched DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm.id))
+
+                if created_timestamp <= datetime_threshold:
+                    self.api.destroy_direct_message(dm.id)
+                    click.echo('Deleted DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm.id))
+                    count += 1
+            except tweepy.error.TweepError as e:
+                if e.api_code == 34:
+                    click.secho('DM already deleted: id {}'.format(id), dim=True)
+
+        click.secho('Deleted {} DMs'.format(count), fg='cyan')
+        self.common.log('Deleted {} DMs'.format(count))
