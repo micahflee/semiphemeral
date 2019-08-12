@@ -568,7 +568,7 @@ class Twitter(object):
 
                     # Try deleting
                     try:
-                        self.api.destroy_direct_message(id)
+                        self.api.destroy_direct_message(dm_id)
                         click.echo('Deleted DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm_id))
                         count += 1
                     except tweepy.error.TweepError as e:
