@@ -554,29 +554,25 @@ class Twitter(object):
         if not self.authenticated:
             return
 
-        # Make a list of DM ids
+        # Make a list of DM ids to delete
+        datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.common.settings.get('dms_days_threshold'))
+        count = 0
         dm_ids = []
         for obj in conversations:
             for message in obj['dmConversation']['messages']:
-                dm_ids.append(int(message['messageCreate']['id']))
-        click.secho('Loaded {} DMs from your twitter data'.format(len(dm_ids)), fg='cyan')
-
-        # Fetching all of these DMs from Twitter, and delete them if they're older than the threshold
-        count = 0
-        datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(days=self.common.settings.get('dms_days_threshold'))
-        for id in dm_ids:
-            try:
-                dm = self.api.get_direct_message(id)
-                created_timestamp = datetime.datetime.fromtimestamp(int(dm.created_timestamp) / 1000)
-                click.echo('Fetched DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm.id))
-
+                created_str = message['messageCreate']['createdAt']
+                created_timestamp = datetime.datetime.strptime(created_str, '%Y-%m-%dT%H:%M:%S.%fZ')
                 if created_timestamp <= datetime_threshold:
-                    self.api.destroy_direct_message(dm.id)
-                    click.echo('Deleted DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm.id))
-                    count += 1
-            except tweepy.error.TweepError as e:
-                if e.api_code == 34:
-                    click.secho('DM already deleted: id {}'.format(id), dim=True)
+                    dm_id = int(message['messageCreate']['id'])
+                    dm_ids.append(dm_id)
+
+                    # Try deleting
+                    try:
+                        self.api.destroy_direct_message(id)
+                        click.echo('Deleted DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm_id))
+                        count += 1
+                    except tweepy.error.TweepError as e:
+                        click.secho('Error deleting DM {}, id {}: {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm_id, str(e)), dim=True)
 
         click.secho('Deleted {} DMs'.format(count), fg='cyan')
         self.common.log('Deleted {} DMs'.format(count))
