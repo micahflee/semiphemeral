@@ -335,6 +335,8 @@ class Twitter(object):
                     self.api.destroy_direct_message(dm.id)
                     click.echo('Deleted DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm.id))
                     count += 1
+                else:
+                    click.secho('Skipping DM {}, id {}'.format(created_timestamp.strftime('%Y-%m-%d'), dm.id), dim=True)
 
             self.common.log("Deleted %s DMs" % count)
 
