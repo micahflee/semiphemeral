@@ -18,10 +18,10 @@ def create_app(common):
         common.settings.load()
 
         if request.method == 'POST':
-            common.settings.set('api_key', request.form['api_key'])
-            common.settings.set('api_secret', request.form['api_secret'])
-            common.settings.set('access_token_key', request.form['access_token_key'])
-            common.settings.set('access_token_secret', request.form['access_token_secret'])
+            common.settings.set('api_key', request.form['api_key'].strip())
+            common.settings.set('api_secret', request.form['api_secret'].strip())
+            common.settings.set('access_token_key', request.form['access_token_key'].strip())
+            common.settings.set('access_token_secret', request.form['access_token_secret'].strip())
             common.settings.set('username', request.form['username'])
 
             if 'log_to_file' in request.form:
