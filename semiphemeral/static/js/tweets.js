@@ -75,7 +75,7 @@ $(function(){
       if(new_page == page) {
         $item.addClass('pagination-item-current').text(text);
       } else {
-        var new_state = { q:q, page:new_page, count:count };
+        var new_state = { q:q, page:new_page, count:count, replies:true };
         var $link = $('<a/>').attr('href', '#'+JSON.stringify(new_state)).text(text);
         $item.append($link);
       }
