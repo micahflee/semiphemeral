@@ -6,11 +6,11 @@ class Settings(object):
     def __init__(self, filename):
         self.filename = filename
         self.default_settings = {
-            'api_key': '',
-            'api_secret': '',
-            'access_token_key': '',
-            'access_token_secret': '',
-            'username': '',
+            'api_key': os.getenv("API_KEY", ""),
+            'api_secret': os.getenv("API_SECRET", ""),
+            'access_token_key': os.getenv("ACCESS_TOKEN_KEY", ""),
+            'access_token_secret': os.getenv("ACCESS_TOKEN_SECRET", ""),
+            'username': os.getenv("TWITTER_USERNAME", ""),
             'user_id': None,
             'delete_tweets': True,
             'tweets_days_threshold': 30,
