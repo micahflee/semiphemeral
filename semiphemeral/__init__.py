@@ -2,6 +2,8 @@ import os
 import click
 import json
 
+from pkg_resources import get_distribution
+
 from .common import Common
 from .settings import Settings
 from .db import create_db
@@ -11,6 +13,7 @@ from .import_export import ImportExport
 
 
 def init():
+    version = get_distribution('semiphemeral').version
     click.echo(click.style("semiphemeral {}".format(version), fg='yellow'))
 
     # Initialize stuff
