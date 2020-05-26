@@ -1,3 +1,5 @@
+**You may be interested in [semiphemeral.com](https://semiphemeral.com/), a hosted service based on this project.** It's easy for anyone to use, but does not have all the same features as this open source project.
+
 ![Logo](/img/logo-small.png)
 
 # Semiphemeral
