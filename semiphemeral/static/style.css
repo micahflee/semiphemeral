@@ -78,14 +78,14 @@ body {
   text-align: right;
 }
 
-.settings form label.checkbox {
+.settings form input[type="text"] {
+  width: 500px;
+}
+
+.settings form label.checkbox, .settings fieldset label {
   display: inline;
   width: auto;
   text-align: left;
-}
-
-.settings form input[type="text"] {
-  width: 500px;
 }
 
 .settings form input.small {

@@ -59,6 +59,9 @@ def create_app(common):
                 common.settings.set('retweets_likes_delete_likes', False)
             common.settings.set('retweets_likes_likes_threshold', int(request.form['retweets_likes_likes_threshold']))
 
+            common.settings.set('proxy', request.form['proxy'])
+            common.settings.set('use_tor', 'use_tor' in request.form)
+
             common.settings.save()
 
             # Recalculate excluded threads with these new settings
@@ -83,7 +86,9 @@ def create_app(common):
             retweets_likes_delete_retweets=common.settings.get('retweets_likes_delete_retweets'),
             retweets_likes_retweets_threshold=common.settings.get('retweets_likes_retweets_threshold'),
             retweets_likes_delete_likes=common.settings.get('retweets_likes_delete_likes'),
-            retweets_likes_likes_threshold=common.settings.get('retweets_likes_likes_threshold'))
+            retweets_likes_likes_threshold=common.settings.get('retweets_likes_likes_threshold'),
+            proxy=common.settings.get('proxy'),
+            use_tor=common.settings.get('use_tor'))
 
     @app.route("/tweets")
     def tweets():

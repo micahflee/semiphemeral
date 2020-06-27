@@ -17,10 +17,19 @@ $(function(){
     } else {
       $('.retweets-likes-fieldset').hide();
     }
+
+    if($('.use-tor-checkbox').prop('checked')) {
+      $('.proxy-text').val('socks5://localhost:9050').attr('readonly', 'readonly');
+      console.log('a');
+    }else{
+      $('.proxy-text').removeAttr('disabled', 'false');
+      console.log('b');
+    }
   }
 
   $('.log-to-file-checkbox').change(update_ui);
   $('.delete-tweets-checkbox').change(update_ui);
   $('.retweets-likes-checkbox').change(update_ui);
+  $('.use-tor-checkbox').change(update_ui);
   update_ui();
 })

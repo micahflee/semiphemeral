@@ -30,7 +30,9 @@ class Settings(object):
             'unlike_ignore_list': [],
             'logging': False,
             'log_filename': os.path.expanduser('~/.semiphemeral/log'),
-            'log_format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            'log_format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            'proxy': None,
+            'use_tor': False
         }
         self.load()
 
