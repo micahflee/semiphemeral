@@ -1,9 +1,9 @@
 function comma_formatted(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-$(function(){
-  $.get('/api/statistics', function(data){
+$(function () {
+  $.get('/api/statistics', function (data) {
     is_configured = (data.is_configured ? 'yes' : 'no');
     $('.statistics .is_configured').text(is_configured);
     $('.statistics .last_fetch').text(data.last_fetch);
