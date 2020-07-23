@@ -87,7 +87,9 @@ def unlike(filename):
         t.unlike(filename)
 
 
-@main.command("delete_dms", short_help="Delete DMs that are older than 30 days")
+@main.command(
+    "delete_dms", short_help="Delete DMs that aren't available through the Twitter API"
+)
 @click.option(
     "--filename",
     required=True,
