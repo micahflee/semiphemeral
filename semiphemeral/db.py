@@ -10,7 +10,7 @@ Base = declarative_base()
 
 
 class Thread(Base):
-    __tablename__ = 'threads'
+    __tablename__ = "threads"
     id = Column(Integer, primary_key=True)
     root_status_id = Column(Integer)
     should_exclude = Column(Boolean)
@@ -23,10 +23,10 @@ class Thread(Base):
 
 
 class Tweet(Base):
-    __tablename__ = 'tweets'
+    __tablename__ = "tweets"
     id = Column(Integer, primary_key=True)
     created_at = Column(DateTime)
-    user_id = Column(Integer) # we download all threads too, including with other users
+    user_id = Column(Integer)  # we download all threads too, including with other users
     user_screen_name = Column(String)
     status_id = Column(Integer)
     lang = Column(String)
@@ -45,7 +45,7 @@ class Tweet(Base):
     is_unliked = Column(Boolean)
     exclude_from_delete = Column(Boolean)
 
-    thread_id = Column(Integer, ForeignKey('threads.id'))
+    thread_id = Column(Integer, ForeignKey("threads.id"))
     thread = relationship("Thread", back_populates="tweets")
 
     def __init__(self, status):
@@ -64,7 +64,7 @@ class Tweet(Base):
         self.favorite_count = status.favorite_count
         self.retweeted = status.retweeted
         self.favorited = status.favorited
-        self.is_retweet = hasattr(status, 'retweeted_status')
+        self.is_retweet = hasattr(status, "retweeted_status")
         self.is_deleted = False
         self.is_unliked = False
         self.exclude_from_delete = False
@@ -75,48 +75,57 @@ class Tweet(Base):
         """
         tweet = session.query(Tweet).filter_by(status_id=self.status_id).first()
         if tweet:
-            click.secho('Skipped {} @{}, id={}'.format(
-                self.created_at.strftime('%Y-%m-%d'),
-                self.user_screen_name,
-                self.status_id), dim=True)
+            click.secho(
+                "Skipped {} @{}, id={}".format(
+                    self.created_at.strftime("%Y-%m-%d"),
+                    self.user_screen_name,
+                    self.status_id,
+                ),
+                dim=True,
+            )
             return True
 
     def fetch_summarize(self):
-        click.echo('Fetched {}'.format(self.summarize_string()))
+        click.echo("Fetched {}".format(self.summarize_string()))
 
     def unretweet_summarize(self):
-        click.echo('Unretweeted {}'.format(self.summarize_string(True)))
+        click.echo("Unretweeted {}".format(self.summarize_string(True)))
 
     def unlike_summarize(self):
-        click.echo('Unliked {}'.format(self.summarize_string()))
+        click.echo("Unliked {}".format(self.summarize_string()))
 
     def relike_unlike_summarize(self):
-        click.echo('Reliked and unliked {}'.format(self.summarize_string()))
+        click.echo("Reliked and unliked {}".format(self.summarize_string()))
 
     def delete_summarize(self):
-        click.echo('Deleted {}'.format(self.summarize_string()))
+        click.echo("Deleted {}".format(self.summarize_string()))
 
     def excluded_summarize(self):
-        click.echo('Excluded from deletion {}'.format(self.summarize_string()))
+        click.echo("Excluded from deletion {}".format(self.summarize_string()))
 
     def excluded_fetch_summarize(self):
-        click.echo('Fetched and excluded from deletion {}'.format(self.summarize_string()))
+        click.echo(
+            "Fetched and excluded from deletion {}".format(self.summarize_string())
+        )
 
     def summarize_string(self, include_rt_user=False):
         if include_rt_user:
-            return '{} @{} {}, id={}'.format(
-                self.created_at.strftime('%Y-%m-%d'),
+            return "{} @{} {}, id={}".format(
+                self.created_at.strftime("%Y-%m-%d"),
                 self.user_screen_name,
-                self.text.split(':')[0],
-                self.status_id)
+                self.text.split(":")[0],
+                self.status_id,
+            )
         else:
-            return '{} @{}, id={}'.format(
-                self.created_at.strftime('%Y-%m-%d'),
+            return "{} @{}, id={}".format(
+                self.created_at.strftime("%Y-%m-%d"),
                 self.user_screen_name,
-                self.status_id)
+                self.status_id,
+            )
+
 
 def create_db(database_path):
-    engine = create_engine('sqlite:///{}'.format(database_path))
+    engine = create_engine("sqlite:///{}".format(database_path))
 
     session = sessionmaker()
     session.configure(bind=engine)

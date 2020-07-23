@@ -8,10 +8,12 @@ There are plenty of tools that let you make your Twitter feed ephemeral, automat
 
 Semiphemeral does this, but also lets you automatically exclude tweets based on criteria: how many RTs or likes they have, and if they're part of a thread where one of your tweets has that many RTs or likes. It also lets you manually select tweets you'd like to exclude from deleting.
 
-~~It can also automatically delete your old direct messages.~~ (DM support is [coming soon](https://github.com/micahflee/semiphemeral/issues/29).)
+It delete all of your old likes, even really old ones that Twitter makes difficult to delete. And it can automatically delete your old direct messages.
 
-_Read more in the blog post: [Semiphemeral: Automatically delete your old tweets, except for the ones you want to keep](https://micahflee.com/2019/06/semiphemeral-automatically-delete-your-old-tweets-except-for-the-ones-you-want-to-keep/)_
+Read more:
 
+* [Semiphemeral: Automatically delete your old tweets, except for the ones you want to keep](https://micahflee.com/2019/06/semiphemeral-automatically-delete-your-old-tweets-except-for-the-ones-you-want-to-keep/)
+* [With Semiphemeral you can delete your old Twitter likes, but it's noisy](https://micahflee.com/2019/07/with-semiphemeral-you-can-delete-your-old-twitter-likes-but-its-noisy/)
 
 ## Installation
 
@@ -33,15 +35,22 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  configure  Start the web server to configure semiphemeral
-  delete     Delete tweets that aren't automatically or manually excluded
-  fetch      Download all tweets
-  stats      Show stats about tweets in the database
+  configure        Start the web server to configure semiphemeral
+  delete           Delete tweets that aren't automatically or manually
+                   excluded, likes, and DMs
+  excluded_export  Export tweets excluded that are excluded from deletion
+  excluded_import  Import tweets excluded that are excluded from deletion
+  fetch            Download all tweets/DMs
+  stats            Show stats about tweets in the database
+  unlike           Delete old likes that aren't available through the Twitter
+                   API
 ```
 
 Start by running `semiphemeral configure`, which starts a local web server at http://127.0.0.1:8080/. Load that website in a browser.
 
 You must supply Twitter API credentials here, which you can get by following [this guide](https://python-twitter.readthedocs.io/en/latest/getting_started.html). Basically, you need to login to https://developer.twitter.com/ and create a new "Twitter app" that only you will be using (when creating an app, you're welcome to use https://github.com/micahflee/semiphemeral as the website URL for your app).
+
+If you want to delete your DMs, you'll have to make sure to give your Twitter app "Read, write, and Direct Messages" permissions, instead of just "Read and write". If you're modifying an existing app to add Direct Message permissions, you'll have to go to the app's "Keys and tokens" page, and under "Access token & access token secret" click "Regenerate". Then add the new access token key and secret into semiphemeral's settings.
 
 From the settings page you also tell semiphemeral which tweets to exclude from deletion:
 
