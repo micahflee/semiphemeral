@@ -1,5 +1,9 @@
 # Semiphemeral Changelog
 
+## 0.6
+
+* Feature: Support deleting DMs
+
 ## 0.5
 
 * Bugfix: Fixed issue fetching tweets from the Twitter API in unlike mode

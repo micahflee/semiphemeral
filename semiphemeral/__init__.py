@@ -9,7 +9,7 @@ from .web import create_app
 from .twitter import Twitter
 from .import_export import ImportExport
 
-version = "0.5"
+version = "0.6"
 
 
 def init():
