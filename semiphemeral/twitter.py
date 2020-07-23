@@ -413,6 +413,7 @@ class Twitter(object):
             self.common.session.commit()
             self.common.log("Deleted %s tweets" % count)
 
+        # Delete DMs
         if self.common.settings.get("delete_dms"):
             datetime_threshold = datetime.datetime.utcnow() - datetime.timedelta(
                 days=self.common.settings.get("dms_days_threshold")
@@ -426,25 +427,26 @@ class Twitter(object):
 
             # Fetch direct messages
             count = 0
-            for dm in self.api.list_direct_messages(count=50):
-                created_timestamp = datetime.datetime.fromtimestamp(
-                    int(dm.created_timestamp) / 1000
-                )
-                if created_timestamp <= datetime_threshold:
-                    self.api.destroy_direct_message(dm.id)
-                    click.echo(
-                        "Deleted DM {}, id {}".format(
-                            created_timestamp.strftime("%Y-%m-%d"), dm.id
+            for page in tweepy.Cursor(self.api.list_direct_messages).pages():
+                for dm in page:
+                    created_timestamp = datetime.datetime.fromtimestamp(
+                        int(dm.created_timestamp) / 1000
+                    )
+                    if created_timestamp <= datetime_threshold:
+                        self.api.destroy_direct_message(dm.id)
+                        click.echo(
+                            "Deleted DM {}, id {}".format(
+                                created_timestamp.strftime("%Y-%m-%d"), dm.id
+                            )
                         )
-                    )
-                    count += 1
-                else:
-                    click.secho(
-                        "Skipping DM {}, id {}".format(
-                            created_timestamp.strftime("%Y-%m-%d"), dm.id
-                        ),
-                        dim=True,
-                    )
+                        count += 1
+                    else:
+                        click.secho(
+                            "Skipping DM {}, id {}".format(
+                                created_timestamp.strftime("%Y-%m-%d"), dm.id
+                            ),
+                            dim=True,
+                        )
 
             self.common.log("Deleted %s DMs" % count)
 
