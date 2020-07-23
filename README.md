@@ -1,8 +1,13 @@
-**You may be interested in [semiphemeral.com](https://semiphemeral.com/), a hosted service based on this project.** It's easy for anyone to use, but does not have all the same features as this open source project.
-
 ![Logo](/img/logo-small.png)
 
 # Semiphemeral
+
+There are two different versions of Semiphemeral:
+
+- **[Semiphemeral.com](https://semiphemeral.com/) is a hosted service that's easy for anyone to use**, but does not have all the same features as this open source project.
+- **This is the _open source_ version.** It's for advanced users who want total control (non-nerds are better off using semiphemeral.com). It requires using the terminal, generating your own Twitter API key, and if you want to automate it, setting up a server with a cron job. However you don't need to give any access to your Twitter account to a 3rd party (me) and it has more features.
+
+## What is this?
 
 There are plenty of tools that let you make your Twitter feed ephemeral, automatically deleting tweets older than some threshold, like one month.
 
@@ -27,7 +32,7 @@ Semiphemeral is a command line tool that you run locally on your computer, or on
 
 ```
 $ semiphemeral
-Usage: semiphemeral [OPTIONS] COMMAND [ARGS]...
+Usage: -c [OPTIONS] COMMAND [ARGS]...
 
   Automatically delete your old tweets, except for the ones you want to keep
 
@@ -38,6 +43,8 @@ Commands:
   configure        Start the web server to configure semiphemeral
   delete           Delete tweets that aren't automatically or manually
                    excluded, likes, and DMs
+
+  delete_dms       Delete DMs that aren't available through the Twitter API
   excluded_export  Export tweets excluded that are excluded from deletion
   excluded_import  Import tweets excluded that are excluded from deletion
   fetch            Download all tweets/DMs
@@ -50,7 +57,7 @@ Start by running `semiphemeral configure`, which starts a local web server at ht
 
 You must supply Twitter API credentials here, which you can get by following [this guide](https://python-twitter.readthedocs.io/en/latest/getting_started.html). Basically, you need to login to https://developer.twitter.com/ and create a new "Twitter app" that only you will be using (when creating an app, you're welcome to use https://github.com/micahflee/semiphemeral as the website URL for your app).
 
-If you want to delete your DMs, you'll have to make sure to give your Twitter app "Read, write, and Direct Messages" permissions, instead of just "Read and write". If you're modifying an existing app to add Direct Message permissions, you'll have to go to the app's "Keys and tokens" page, and under "Access token & access token secret" click "Regenerate". Then add the new access token key and secret into semiphemeral's settings.
+If you want to delete your DMs, you'll have to make sure to give your Twitter app "Read, write, and Direct Messages" permissions, instead of just "Read and write". (If you're modifying an existing app to add Direct Message permissions, you'll have to go to the app's "Keys and tokens" page, and under "Access token & access token secret" click "Regenerate". Then add the new access token key and secret into semiphemeral's settings.)
 
 From the settings page you also tell semiphemeral which tweets to exclude from deletion:
 
@@ -68,6 +75,41 @@ After you have manually deleted once, you can automatically delete your old twee
 
 Settings are stored in `~/.semiphemeral/settings.json`. All tweets (including exceptions, and deleted tweets) are stored in a sqlite database `~/.semiphemeral/tweets.db`.
 
+## Deleting old direct messages
+
+The Twitter API only lets you fetch your last 30 days worth of DMs. If you have years worth of old DMs, you can still delete them all.
+
+This is how to use the `delete_dms` command:
+
+```sh
+$ semiphemeral delete_dms --help
+Usage: semiphemeral delete_dms [OPTIONS]
+
+Options:
+  --filename TEXT  Path to direct-message.js from Twitter data downloaded from
+                   https://twitter.com/settings/your_twitter_data  [required]
+
+  --help           Show this message and exit.
+```
+
+In order to get a list of all of your DMs (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your DMs). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `direct-message.js`. Run this command, with the path to your `direct-message.js`, for example:
+
+```sh
+semiphemeral unlike --filename ~/Downloads/twitter-2020-07-22/direct-message.js
+```
+
+Your filename will be different than this one, so make sure you update the command to match it.
+
+This will delete all of your old DMs. New DMs don't have this problem. So as long as you regularly run `semiphemeral delete`, your new DMs will automatically get deleted.
+
+## Deleting old tweets
+
+Semiphemeral deleted about 20,000 of my tweets, starting from my earliest in 2009. But I've heard reports that for some people, Semiphemeral only deletes about 3,000 tweets and can't delete anything earlier.
+
+I don't know why the Twitter API works the way it does, but unfortunately for some users when you say, "hey Twitter, give me a list of all my tweets" it only gives you a list of the most recent 3,000. And if you delete all of those, it gives you a list of 0, even if you have way more.
+
+_At the moment, Semiphemeral can't help you solve this problem._
+
 ## Deleting old likes
 
 The Twitter API is only willing to tell you about your last 4000 likes. If you've already tried to fetch and delete your likes, but still have a lot of old likes, you can use semiphemeral to automate unliking them.
@@ -76,10 +118,23 @@ _**WARNING: One does not simply unlike old tweets.** Twitter works in mysterious
 
 _**WARNING: Prepare to spend WEEKS running this command.** Twitter only allows users to like up to 1000 tweets per day. This means that if you need to unlike 15,000 old tweets, then this script will take 15 days to run! After the first 1000 like/unlikes, the script will pause for 24 hours. If possible, I recommend you run this on a server in a screen or tmux session, so that it doesn't get interrupted when you suspend your laptop. And if you're running semiphemeral on a cron job, I recommend that you disable it first, and then start it up again when it's finished._
 
+This is how to use the `unlike` command:
+
+```sh
+$ semiphemeral unlike --help
+Usage: semiphemeral unlike [OPTIONS]
+
+Options:
+  --filename TEXT  Path to like.js from Twitter data downloaded from
+                   https://twitter.com/settings/your_twitter_data  [required]
+
+  --help           Show this message and exit.
+```
+
 In order to get a list of all of your old likes (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your likes). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `like.js`. Run this command, with the path to your `like.js`, for example:
 
 ```sh
-semiphemeral unlike --filename ~/Downloads/twitter-2019-06-07-8195574bc935602c0056aee12fb11de78553835ace755eb782c895283f7fa14e/like.js
+semiphemeral unlike --filename ~/Downloads/twitter-2020-07-22/like.js
 ```
 
 Your filename will be different than this one, so make sure you update the command to match it.
@@ -93,7 +148,7 @@ New likes don't have this problem, so as long as you regularly run `semiphemeral
 Make sure you have [pipenv](https://pipenv.readthedocs.io/en/latest/). Then install dependencies:
 
 ```sh
-pipenv install --dev
+pipenv install --dev --pre
 ```
 
 And run the program like this:
