@@ -27,7 +27,7 @@ $(function () {
     if ($('.use-tor-checkbox').prop('checked')) {
       $('.proxy-text').val('socks5://localhost:9050').attr('readonly', 'readonly');
     } else{
-      $('.proxy-text').removeAttr('disabled', 'false');
+      $('.proxy-text').removeAttr('readonly', 'false');
     }
   }
 
