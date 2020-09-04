@@ -5,13 +5,17 @@ verify_ssl = true
 
 [dev-packages]
 twine = "*"
+black = "*"
 
 [packages]
 click = "*"
 colorama = "*"
 flask = "*"
 sqlalchemy = "*"
-tweepy = "*"
+tweepy = ">=3.9.0"
 
 [requires]
 python_version = "3"
+
+[pipenv]
+allow_prereleases = true

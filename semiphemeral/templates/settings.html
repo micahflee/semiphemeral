@@ -114,6 +114,23 @@
 
     </fieldset>
 
+    <p>
+      <label class="checkbox">
+        <input type="checkbox" class="dms-checkbox" name="delete_dms" {% if delete_dms %}checked="checked"{% endif %} />
+        Delete direct messages
+      </label>
+    </p>
+
+    <fieldset class="dms-fieldset">
+      <legend>Direct messages</legend>
+
+      <p>
+        Delete direct messages older than
+        <input class="small" type="number" min="0"  name="dms_days_threshold" value="{{ dms_days_threshold }}" \>
+        days
+      </p>
+    </fieldset>
+
     <fieldset class="privacy-fieldset">
         <legend>Privacy</legend>
 
@@ -125,7 +142,6 @@
               Use Tor
             </label>
         </p>
-
     </fieldset>
 
     <p><input type="submit" value="Save" /></p>
