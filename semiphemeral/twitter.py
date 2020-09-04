@@ -29,7 +29,7 @@ class Twitter(object):
             self.common.settings.get("access_token_secret"),
         )
         self.api = tweepy.API(
-            auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, proxy=self.common.settings.get('proxy'))
+            auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, proxy=self.common.settings.get('proxy')
         )
 
         self.authenticated = True

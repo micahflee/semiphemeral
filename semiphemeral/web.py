@@ -136,7 +136,7 @@ def create_app(common):
             delete_dms=common.settings.get("delete_dms"),
             dms_days_threshold=common.settings.get("dms_days_threshold"),
             proxy=common.settings.get('proxy'),
-            use_tor=common.settings.get('use_tor')),
+            use_tor=common.settings.get('use_tor'),
         )
 
     @app.route("/tweets")
