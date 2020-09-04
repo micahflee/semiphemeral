@@ -129,7 +129,19 @@
         <input class="small" type="number" min="0"  name="dms_days_threshold" value="{{ dms_days_threshold }}" \>
         days
       </p>
+    </fieldset>
 
+    <fieldset class="privacy-fieldset">
+        <legend>Privacy</legend>
+
+        <p>
+            <label for="proxy">Proxy</label>
+            <input type="text" class="proxy-text" name="proxy" value="{{ proxy }}" \>
+            <label class="checkbox">
+              <input type="checkbox" class="use-tor-checkbox" name="use_tor" {% if use_tor %}checked="checked"{% endif %} />
+              Use Tor
+            </label>
+        </p>
     </fieldset>
 
     <p><input type="submit" value="Save" /></p>

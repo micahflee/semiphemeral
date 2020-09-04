@@ -23,11 +23,18 @@ $(function () {
     } else {
       $('.dms-fieldset').hide();
     }
+
+    if ($('.use-tor-checkbox').prop('checked')) {
+      $('.proxy-text').val('socks5://localhost:9050').attr('readonly', 'readonly');
+    } else{
+      $('.proxy-text').removeAttr('readonly', 'false');
+    }
   }
 
   $('.log-to-file-checkbox').change(update_ui);
   $('.delete-tweets-checkbox').change(update_ui);
   $('.retweets-likes-checkbox').change(update_ui);
+  $('.use-tor-checkbox').change(update_ui);
   $('.dms-checkbox').change(update_ui);
   update_ui();
 })
