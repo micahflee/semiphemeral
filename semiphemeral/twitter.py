@@ -678,17 +678,17 @@ class Twitter(object):
         if not os.path.isfile(filename):
             click.echo("Invalid file")
             return
-        if os.path.basename(filename) != "direct-message.js":
-            click.echo("File should be called direct-message.js")
+        if os.path.basename(filename) != "direct-messages.js":
+            click.echo("File should be called direct-messages.js")
             return
 
         # Validate file format
         with open(filename) as f:
-            expected_start = "window.YTD.direct_message.part0 = "
+            expected_start = "window.YTD.direct_messages.part0 = "
             js_string = f.read()
             if not js_string.startswith(expected_start):
                 click.echo(
-                    "File expected to start with: `window.YTD.direct_message.part0 = `"
+                    "File expected to start with: `window.YTD.direct_messages.part0 = `"
                 )
                 return
             json_string = js_string[len(expected_start) :]
