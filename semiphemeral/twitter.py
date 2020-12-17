@@ -678,7 +678,7 @@ class Twitter(object):
         if not os.path.isfile(filename):
             click.echo("Invalid file")
             return
-        if os.path.basename(filename) not in ("direct-messages.js", "direct-messages.js"):
+        if os.path.basename(filename) not in ("direct-message.js", "direct-messages.js"):
             click.echo("File should be called direct-message.js or direct-messages.js")
             return
 
