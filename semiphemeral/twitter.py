@@ -690,7 +690,7 @@ class Twitter(object):
                     "File expected to start with: `window.YTD.direct_message`"
                 )
                 return
-            json_string = js_string[len(expected_start) :]
+            json_string = js_string[js_string.find("[") :]
             try:
                 conversations = json.loads(json_string)
             except:
