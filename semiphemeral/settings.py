@@ -30,7 +30,7 @@ class Settings(object):
             "logging": False,
             "log_filename": os.path.expanduser("~/.semiphemeral/log"),
             "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            'proxy': None,
+            'proxy': "",
             'use_tor': False,
         }
         self.load()
