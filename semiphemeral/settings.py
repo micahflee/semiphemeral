@@ -54,6 +54,7 @@ class Settings(object):
 
     def save(self):
         with open(self.filename, "w") as f:
+            os.chmod(self.filename, 0o0600)
             json.dump(self.settings, f)
 
     def is_configured(self):
