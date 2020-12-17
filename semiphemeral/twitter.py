@@ -3,7 +3,6 @@ import click
 import json
 import datetime
 import os
-import json
 import time
 
 from .db import Tweet, Thread
