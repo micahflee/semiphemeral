@@ -431,6 +431,15 @@ class Twitter(object):
             # Fetch direct messages
             count = 0
             for page in tweepy.Cursor(self.api.list_direct_messages).pages():
+                # Twitter will return an apparently unlimited number of empty DM responses
+                # in certain cases, which will hit the rate limit very quickly (15 per 15
+                # minutes, currently). Exit if we get an empty response.
+                if not page:
+                    click.secho(
+                        "No more accessible DMs", fg="cyan"
+                    )
+                    break
+
                 for dm in page:
                     created_timestamp = datetime.datetime.fromtimestamp(
                         int(dm.created_timestamp) / 1000
