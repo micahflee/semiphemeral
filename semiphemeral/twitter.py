@@ -462,7 +462,7 @@ class Twitter(object):
             return
 
         # Validate file format
-        with open(filename) as f:
+        with open(filename, encoding="utf8") as f:
             expected_start = "window.YTD.like.part0 = "
             js_string = f.read()
             if not js_string.startswith(expected_start):
