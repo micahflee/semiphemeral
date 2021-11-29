@@ -65,6 +65,7 @@ class Common:
             )
         ).first()[0]
         threads = self.session.execute("SELECT COUNT(*) FROM threads").first()[0]
+        tweets_to_delete = self.get_tweets_to_delete()
 
         return {
             "is_configured": is_configured,
@@ -78,6 +79,7 @@ class Common:
             "excluded_tweets": excluded_tweets,
             "other_tweets": other_tweets,
             "threads": threads,
+            "tweets_to_delete": len(tweets_to_delete),
         }
 
     def get_tweets_to_delete(self, include_excluded=False):

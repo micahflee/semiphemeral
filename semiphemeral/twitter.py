@@ -50,6 +50,14 @@ class Twitter(object):
         stats = self.common.get_stats()
         click.echo(json.dumps(stats, indent=2))
 
+        if self.common.settings.get("delete_tweets"):
+            tweets_to_delete = self.common.get_tweets_to_delete()
+            click.secho(
+                "Want to delete {} tweets".format(len(tweets_to_delete)),
+                fg="cyan",
+            )
+
+
     def fetch(self):
         if not self.authenticated:
             return
