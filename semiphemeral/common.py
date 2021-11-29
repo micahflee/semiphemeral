@@ -22,6 +22,11 @@ class Common:
         self.settings.load()
 
         is_configured = self.settings.is_configured()
+        if not is_configured:
+            return {
+                "is_configured": is_configured,
+            }
+
         last_fetch = self.settings.get("last_fetch")
         my_tweets = self.session.execute(
             "SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=0".format(

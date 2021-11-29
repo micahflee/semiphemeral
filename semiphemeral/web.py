@@ -101,9 +101,10 @@ def create_app(common):
 
             common.settings.save()
 
-            # Recalculate excluded threads with these new settings
-            twitter = Twitter(common)
-            twitter.calculate_excluded_threads()
+            if common.settings.is_configured():
+                # Recalculate excluded threads with these new settings
+                twitter = Twitter(common)
+                twitter.calculate_excluded_threads()
 
         return render_template(
             "settings.html",
