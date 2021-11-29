@@ -3,7 +3,6 @@ import click
 import json
 import datetime
 import os
-import json
 import time
 
 from .db import Tweet, Thread
@@ -28,8 +27,11 @@ class Twitter(object):
             self.common.settings.get("access_token_key"),
             self.common.settings.get("access_token_secret"),
         )
+        proxy=self.common.settings.get('proxy')
+        if proxy == "":
+            proxy = None
         self.api = tweepy.API(
-            auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, proxy=self.common.settings.get('proxy')
+            auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, proxy=proxy
         )
 
         self.authenticated = True
@@ -429,6 +431,15 @@ class Twitter(object):
             # Fetch direct messages
             count = 0
             for page in tweepy.Cursor(self.api.list_direct_messages).pages():
+                # Twitter will return an apparently unlimited number of empty DM responses
+                # in certain cases, which will hit the rate limit very quickly (15 per 15
+                # minutes, currently). Exit if we get an empty response.
+                if not page:
+                    click.secho(
+                        "No more accessible DMs", fg="cyan"
+                    )
+                    break
+
                 for dm in page:
                     created_timestamp = datetime.datetime.fromtimestamp(
                         int(dm.created_timestamp) / 1000
@@ -678,7 +689,7 @@ class Twitter(object):
         if not os.path.isfile(filename):
             click.echo("Invalid file")
             return
-        if os.path.basename(filename) not in ("direct-messages.js", "direct-messages.js"):
+        if os.path.basename(filename) not in ("direct-message.js", "direct-messages.js"):
             click.echo("File should be called direct-message.js or direct-messages.js")
             return
 
@@ -691,7 +702,7 @@ class Twitter(object):
                     "File expected to start with: `window.YTD.direct_message`"
                 )
                 return
-            json_string = js_string[len(expected_start) :]
+            json_string = js_string[js_string.find("[") :]
             try:
                 conversations = json.loads(json_string)
             except:
