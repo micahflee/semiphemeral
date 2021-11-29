@@ -95,7 +95,7 @@ Options:
 In order to get a list of all of your DMs (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your DMs). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `direct-message.js`. Run this command, with the path to your `direct-message.js`, for example:
 
 ```sh
-semiphemeral unlike --filename ~/Downloads/twitter-2020-07-22/direct-message.js
+semiphemeral delete_dms --filename ~/Downloads/twitter-2020-07-22/direct-message.js
 ```
 
 Your filename will be different than this one, so make sure you update the command to match it.
