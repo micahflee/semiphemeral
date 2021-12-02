@@ -57,9 +57,11 @@ class Tweet(Base):
         self.source = status.source
         self.source_url = status.source_url
         self.text = status.full_text
-        self.in_reply_to_screen_name = status.in_reply_to_screen_name
-        self.in_reply_to_status_id = status.in_reply_to_status_id
-        self.in_reply_to_user_id = status.in_reply_to_user_id
+
+        # These fields don't exist in imported non-reply tweets
+        for field in ('in_reply_to_screen_name', 'in_reply_to_status_id', 'in_reply_to_user_id'):
+            setattr(self, field, getattr(status, field, None))
+
         self.retweet_count = status.retweet_count
         self.favorite_count = status.favorite_count
         self.retweeted = status.retweeted

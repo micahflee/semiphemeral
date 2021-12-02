@@ -73,6 +73,13 @@ def delete():
     if common.settings.is_configured():
         t.delete()
 
+@main.command('import', short_help='Import tweets from a Twitter data export')
+@click.argument('path', type=click.Path(exists=True))
+def archive_import(path):
+    common = init()
+    t = Twitter(common)
+    t.import_dump(path)
+
 
 @main.command(
     "unlike",
