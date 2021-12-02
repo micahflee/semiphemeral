@@ -22,6 +22,11 @@ class Common:
         self.settings.load()
 
         is_configured = self.settings.is_configured()
+        if not is_configured:
+            return {
+                "is_configured": is_configured,
+            }
+
         last_fetch = self.settings.get("last_fetch")
         my_tweets = self.session.execute(
             "SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=0".format(
@@ -60,6 +65,7 @@ class Common:
             )
         ).first()[0]
         threads = self.session.execute("SELECT COUNT(*) FROM threads").first()[0]
+        tweets_to_delete = self.get_tweets_to_delete()
 
         return {
             "is_configured": is_configured,
@@ -73,6 +79,7 @@ class Common:
             "excluded_tweets": excluded_tweets,
             "other_tweets": other_tweets,
             "threads": threads,
+            "tweets_to_delete": len(tweets_to_delete),
         }
 
     def get_tweets_to_delete(self, include_excluded=False):

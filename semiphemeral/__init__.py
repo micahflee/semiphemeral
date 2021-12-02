@@ -16,9 +16,12 @@ def init():
     click.echo(click.style("semiphemeral {}".format(version), fg="yellow"))
 
     # Initialize stuff
-    os.makedirs(os.path.expanduser("~/.semiphemeral"), exist_ok=True)
-    settings = Settings(os.path.expanduser("~/.semiphemeral/settings.json"))
-    session = create_db(os.path.expanduser("~/.semiphemeral/tweets.db"))
+    base = os.path.expanduser("~/.semiphemeral")
+    os.makedirs(base, mode=0o700, exist_ok=True)
+    # Fix insecure prior installation permissions
+    os.chmod(base, 0o700)
+    settings = Settings(os.path.join(base, "settings.json"))
+    session = create_db(os.path.join(base, "tweets.db"))
 
     common = Common(settings, session)
     return common

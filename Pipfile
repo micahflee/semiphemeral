@@ -12,7 +12,7 @@ click = "*"
 colorama = "*"
 flask = "*"
 sqlalchemy = "*"
-tweepy = ">=3.9.0"
+tweepy = "~=3.10"
 
 [requires]
 python_version = "3"

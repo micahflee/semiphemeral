@@ -96,14 +96,15 @@ def create_app(common):
                 "dms_days_threshold", int(request.form["dms_days_threshold"])
             )
 
-            common.settings.set('proxy', request.form['proxy'])
+            common.settings.set('proxy', request.form['proxy'].strip())
             common.settings.set('use_tor', 'use_tor' in request.form)
 
             common.settings.save()
 
-            # Recalculate excluded threads with these new settings
-            twitter = Twitter(common)
-            twitter.calculate_excluded_threads()
+            if common.settings.is_configured():
+                # Recalculate excluded threads with these new settings
+                twitter = Twitter(common)
+                twitter.calculate_excluded_threads()
 
         return render_template(
             "settings.html",

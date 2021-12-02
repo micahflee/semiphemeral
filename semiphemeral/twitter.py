@@ -3,7 +3,6 @@ import click
 import json
 import datetime
 import os
-import json
 import time
 
 from tweepy.models import Status
@@ -29,11 +28,14 @@ class Twitter(object):
             self.common.settings.get("access_token_key"),
             self.common.settings.get("access_token_secret"),
         )
+        proxy=self.common.settings.get('proxy')
+        if proxy == "" or proxy == "None":
+            proxy = None
         self.api = tweepy.API(
             auth,
             wait_on_rate_limit=True,
             wait_on_rate_limit_notify=True,
-            proxy=self.common.settings.get("proxy"),
+            proxy=proxy,
         )
 
         self.authenticated = True
@@ -51,6 +53,14 @@ class Twitter(object):
         click.secho("Statistics", fg="cyan")
         stats = self.common.get_stats()
         click.echo(json.dumps(stats, indent=2))
+
+        if self.common.settings.get("delete_tweets"):
+            tweets_to_delete = self.common.get_tweets_to_delete()
+            click.secho(
+                "Want to delete {} tweets".format(len(tweets_to_delete)),
+                fg="cyan",
+            )
+
 
     def fetch(self):
         if not self.authenticated:
@@ -433,6 +443,15 @@ class Twitter(object):
             # Fetch direct messages
             count = 0
             for page in tweepy.Cursor(self.api.list_direct_messages).pages():
+                # Twitter will return an apparently unlimited number of empty DM responses
+                # in certain cases, which will hit the rate limit very quickly (15 per 15
+                # minutes, currently). Exit if we get an empty response.
+                if not page:
+                    click.secho(
+                        "No more accessible DMs", fg="cyan"
+                    )
+                    break
+
                 for dm in page:
                     created_timestamp = datetime.datetime.fromtimestamp(
                         int(dm.created_timestamp) / 1000
@@ -683,7 +702,7 @@ class Twitter(object):
             click.echo("Invalid file")
             return
         if os.path.basename(filename) not in (
-            "direct-messages.js",
+            "direct-message.js",
             "direct-messages.js",
         ):
             click.echo("File should be called direct-message.js or direct-messages.js")
@@ -696,7 +715,7 @@ class Twitter(object):
             if not js_string.startswith(expected_start):
                 click.echo("File expected to start with: `window.YTD.direct_message`")
                 return
-            json_string = js_string[len(expected_start) :]
+            json_string = js_string[js_string.find("[") :]
             try:
                 conversations = json.loads(json_string)
             except:
