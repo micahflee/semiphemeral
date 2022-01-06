@@ -73,7 +73,7 @@ def delete():
     if common.settings.is_configured():
         t.delete()
 
-@main.command('import', short_help='Import tweets from a Twitter data export')
+@main.command('import', short_help='Import tweets from a Twitter archive export')
 @click.argument('path', type=click.Path(exists=True))
 def archive_import(path):
     common = init()
@@ -88,7 +88,7 @@ def archive_import(path):
 @click.option(
     "--filename",
     required=True,
-    help="Path to like.js from Twitter data downloaded from https://twitter.com/settings/your_twitter_data",
+    help="Path to like.js from Twitter archive downloaded from https://twitter.com/settings/your_twitter_data",
 )
 def unlike(filename):
     common = init()
@@ -104,7 +104,7 @@ def unlike(filename):
 @click.option(
     "--filename",
     required=True,
-    help="Path to direct-message.js from Twitter data downloaded from https://twitter.com/settings/your_twitter_data",
+    help="Path to direct-message.js from Twitter archive downloaded from https://twitter.com/settings/your_twitter_data",
 )
 def delete_dms(filename):
     common = init()
