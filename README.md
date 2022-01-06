@@ -86,13 +86,13 @@ $ semiphemeral delete_dms --help
 Usage: semiphemeral delete_dms [OPTIONS]
 
 Options:
-  --filename TEXT  Path to direct-message.js from Twitter data downloaded from
+  --filename TEXT  Path to direct-message.js from Twitter archive downloaded from
                    https://twitter.com/settings/your_twitter_data  [required]
 
   --help           Show this message and exit.
 ```
 
-In order to get a list of all of your DMs (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your DMs). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `direct-message.js`. Run this command, with the path to your `direct-message.js`, for example:
+In order to get a list of all of your DMs (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter archive. Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `direct-message.js`. Run this command, with the path to your `direct-message.js`, for example:
 
 ```sh
 semiphemeral delete_dms --filename ~/Downloads/twitter-2020-07-22/direct-message.js
@@ -125,13 +125,13 @@ $ semiphemeral unlike --help
 Usage: semiphemeral unlike [OPTIONS]
 
 Options:
-  --filename TEXT  Path to like.js from Twitter data downloaded from
+  --filename TEXT  Path to like.js from Twitter archive downloaded from
                    https://twitter.com/settings/your_twitter_data  [required]
 
   --help           Show this message and exit.
 ```
 
-In order to get a list of all of your old likes (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter data (note that this is different than your "Twitter archive", which doesn't include information about your likes). Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `like.js`. Run this command, with the path to your `like.js`, for example:
+In order to get a list of all of your old likes (since the Twitter API won't give it to you), you must go to https://twitter.com/settings/your_twitter_data and download your Twitter archive. Twitter will email you a link to a zip file. When you unzip it there will be many files, including a file called `like.js`. Run this command, with the path to your `like.js`, for example:
 
 ```sh
 semiphemeral unlike --filename ~/Downloads/twitter-2020-07-22/like.js
