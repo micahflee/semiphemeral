@@ -23,6 +23,13 @@ class Twitter(object):
             )
             return
 
+        # Check for tweepy version at run-time to avoid later crashes.
+        if not tweepy.__version__.startswith('3.10.'):
+            click.echo(
+                "Python package 'tweepy' must be version 3.10.x"
+            )
+            return
+
         auth = tweepy.OAuthHandler(
             self.common.settings.get("api_key"), self.common.settings.get("api_secret")
         )
