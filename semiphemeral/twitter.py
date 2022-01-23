@@ -3,7 +3,9 @@ import click
 import json
 import datetime
 import os
+import io
 import time
+from zipfile import ZipFile
 
 from tweepy.models import Status
 from .db import Tweet, Thread
@@ -782,24 +784,37 @@ class Twitter(object):
 
     def import_dump(self, filepath):
         if self.common.settings.get("delete_tweets"):
-            with open(os.path.join(filepath, "tweet.js"), "r", encoding="UTF-8") as f:
-                # Skip the JS variable assignment at the start of this file
-                f.read(25)
-                tweets = json.load(f)
+
+            if os.path.isdir(filepath):
+                # Unzipped tweet archive
+                with open(os.path.join(filepath, "data", "tweet.js"), "r", encoding="UTF-8") as f:
+                    # Skip the JS variable assignment at the start of this file
+                    f.read(25)
+                    tweets = json.load(f)
+            elif os.path.splitext(filepath)[1] == ".zip":
+                # Zipped tweet archive
+                with ZipFile(filepath) as zipfile:
+                    with zipfile.open("data/tweet.js") as f:
+                        f = io.TextIOWrapper(f, "UTF-8")
+                        # Skip the JS variable assignment at the start of this file
+                        f.read(25)
+                        tweets = json.load(f)
+            else:
+                click.echo("Path should be a zipped tweet export file or the extracted directory")
+                return
+
             click.echo("Importing {} tweets from {}".format(len(tweets), filepath))
 
             current_user = self.api.me()
 
             def parse_tweet(tweet):
-                """Parse a JSON tweet into a tweepy object and insert missing author."""
-                t = Status.parse(self.api, tweet)
+                """Parse a JSON tweet into a Tweet DB object."""
+                t = Status.parse(self.api, tweet["tweet"])
                 t.author = current_user
-                return t
+                return Tweet(t)
 
-            for offset in range(0, len(tweets), 500):
-                self.import_tweets(
-                    parse_tweet(t) for t in tweets[offset : offset + 500]
-                )
+            for t in tweets:
+                self.import_tweet_and_thread(parse_tweet(t))
 
         # All done, update the since_id
         tweet = (
