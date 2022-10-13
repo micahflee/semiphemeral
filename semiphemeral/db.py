@@ -53,7 +53,8 @@ class Tweet(Base):
         self.user_id = status.author.id
         self.user_screen_name = status.author.screen_name
         self.status_id = status.id
-        self.lang = status.lang
+        if hasattr(status, 'lang'):
+            self.lang = status.lang
         self.source = status.source
         self.source_url = status.source_url
         self.text = status.full_text
