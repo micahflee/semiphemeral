@@ -32,7 +32,7 @@ Semiphemeral is a command line tool that you run locally on your computer, or on
 
 ```
 $ semiphemeral
-Usage: -c [OPTIONS] COMMAND [ARGS]...
+Usage: semiphemeral [OPTIONS] COMMAND [ARGS]...
 
   Automatically delete your old tweets, except for the ones you want to keep
 
@@ -43,11 +43,11 @@ Commands:
   configure        Start the web server to configure semiphemeral
   delete           Delete tweets that aren't automatically or manually
                    excluded, likes, and DMs
-
   delete_dms       Delete DMs that aren't available through the Twitter API
   excluded_export  Export tweets excluded that are excluded from deletion
   excluded_import  Import tweets excluded that are excluded from deletion
   fetch            Download all tweets/DMs
+  import           Import tweets from a Twitter data export
   stats            Show stats about tweets in the database
   unlike           Delete old likes that aren't available through the Twitter
                    API
