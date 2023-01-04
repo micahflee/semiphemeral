@@ -1,4 +1,4 @@
-![Logo](/img/logo-small.png)
+![Logo](img/logo-small.png)
 
 # Semiphemeral
 
