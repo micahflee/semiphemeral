@@ -6,9 +6,12 @@ import os
 import io
 import time
 from zipfile import ZipFile
+import pytz
 
 from tweepy.models import Status
 from .db import Tweet, Thread
+
+utc = pytz.UTC
 
 
 class Twitter(object):
@@ -24,11 +27,9 @@ class Twitter(object):
             return
 
         # Check for tweepy version at run-time to avoid later crashes.
-        if not tweepy.__version__.startswith('3.10.'):
-            click.echo(
-                "Python package 'tweepy' must be version 3.10.x"
-            )
-            return
+        # if not tweepy.__version__.startswith("3.10."):
+        #     click.echo("Python package 'tweepy' must be version 3.10.x")
+        #     return
 
         auth = tweepy.OAuthHandler(
             self.common.settings.get("api_key"), self.common.settings.get("api_secret")
@@ -37,20 +38,20 @@ class Twitter(object):
             self.common.settings.get("access_token_key"),
             self.common.settings.get("access_token_secret"),
         )
-        proxy=self.common.settings.get('proxy')
+        proxy = self.common.settings.get("proxy")
         if proxy == "" or proxy == "None":
             proxy = None
         self.api = tweepy.API(
             auth,
             wait_on_rate_limit=True,
-            wait_on_rate_limit_notify=True,
+            # wait_on_rate_limit_notify=True,
             proxy=proxy,
         )
 
         self.authenticated = True
 
         # Make sure we've saved the user id
-        user = self.api.get_user(self.common.settings.get("username"))
+        user = self.api.get_user(screen_name=self.common.settings.get("username"))
         if user:
             self.common.settings.set("user_id", user.id)
             self.common.settings.save()
@@ -69,7 +70,6 @@ class Twitter(object):
                 "Want to delete {} tweets".format(len(tweets_to_delete)),
                 fg="cyan",
             )
-
 
     def fetch(self):
         if not self.authenticated:
@@ -251,7 +251,7 @@ class Twitter(object):
                         tweet.in_reply_to_status_id, tweet_mode="extended"
                     )
                     fetched_count += self.import_tweet_and_thread(Tweet(status))
-                except tweepy.error.TweepError:
+                except tweepy.TweepyException:
                     # If it's been deleted, ignore
                     pass
 
@@ -272,7 +272,7 @@ class Twitter(object):
         if self.common.settings.get("tweets_threads_threshold"):
             threads = (
                 self.common.session.query(Thread)
-                .join(Thread.tweets, aliased=True)
+                .join(Thread.tweets)
                 .filter(Tweet.user_id == int(self.common.settings.get("user_id")))
                 .filter(Tweet.is_deleted == 0)
                 .filter(Tweet.is_retweet == 0)
@@ -310,7 +310,10 @@ class Twitter(object):
                     .filter(Tweet.user_id == int(self.common.settings.get("user_id")))
                     .filter(Tweet.is_deleted == 0)
                     .filter(Tweet.is_retweet == 1)
-                    .filter(Tweet.created_at < datetime_threshold)
+                    .filter(
+                        tweet.created_at.replace(tzinfo=utc)
+                        < datetime_threshold.replace(tzinfo=utc)
+                    )
                     .order_by(Tweet.created_at)
                     .all()
                 )
@@ -329,7 +332,7 @@ class Twitter(object):
                         tweet.unretweet_summarize()
                         tweet.is_deleted = True
                         self.common.session.add(tweet)
-                    except tweepy.error.TweepError as e:
+                    except tweepy.TweepyException as e:
                         if e.api_code == 144:
                             click.echo(
                                 "Error, retweet {} is already deleted, updating database".format(
@@ -360,7 +363,10 @@ class Twitter(object):
                     .filter(Tweet.user_id != int(self.common.settings.get("user_id")))
                     .filter(Tweet.is_unliked == False)
                     .filter(Tweet.favorited == True)
-                    .filter(Tweet.created_at < datetime_threshold)
+                    .filter(
+                        tweet.created_at.replace(tzinfo=utc)
+                        < datetime_threshold.replace(tzinfo=utc)
+                    )
                     .order_by(Tweet.created_at)
                     .all()
                 )
@@ -379,7 +385,7 @@ class Twitter(object):
                         tweet.unlike_summarize()
                         tweet.is_unliked = True
                         self.common.session.add(tweet)
-                    except tweepy.error.TweepError as e:
+                    except tweepy.TweepyException as e:
                         if e.api_code == 144:
                             click.echo(
                                 "Error, tweet {} is already unliked, updating database".format(
@@ -418,7 +424,7 @@ class Twitter(object):
                     tweet.delete_summarize()
                     tweet.is_deleted = True
                     self.common.session.add(tweet)
-                except tweepy.error.TweepError as e:
+                except tweepy.TweepyException as e:
                     if e.api_code == 144:
                         click.echo(
                             "Error, tweet {} is already deleted, updating database".format(
@@ -456,9 +462,7 @@ class Twitter(object):
                 # in certain cases, which will hit the rate limit very quickly (15 per 15
                 # minutes, currently). Exit if we get an empty response.
                 if not page:
-                    click.secho(
-                        "No more accessible DMs", fg="cyan"
-                    )
+                    click.secho("No more accessible DMs", fg="cyan")
                     break
 
                 for dm in page:
@@ -494,7 +498,7 @@ class Twitter(object):
             return
 
         # Validate file format
-        with open(filename) as f:
+        with open(filename, encoding="utf-8") as f:
             expected_start = "window.YTD.like.part0 = "
             js_string = f.read()
             if not js_string.startswith(expected_start):
@@ -564,7 +568,9 @@ class Twitter(object):
             .order_by(Tweet.created_at.desc())
             .all()
         ):
-            if tweet.created_at < datetime_threshold:
+            if tweet.created_at.replace(tzinfo=utc) < datetime_threshold.replace(
+                tzinfo=utc
+            ):
                 all_tweets.append(tweet)
             loaded_status_ids.append(tweet.status_id)
         click.secho("Loaded {} tweets from database".format(len(all_tweets)), fg="cyan")
@@ -592,10 +598,12 @@ class Twitter(object):
                         tweet.fetch_summarize()
                         self.common.session.add(tweet)
                         count += 1
-
-                        if tweet.created_at < datetime_threshold:
+                        print(tweet.created_at, datetime_threshold)
+                        if tweet.created_at.replace(
+                            tzinfo=utc
+                        ) < datetime_threshold.replace(tzinfo=utc):
                             all_tweets.append(tweet)
-                except tweepy.error.TweepError as e:
+                except tweepy.TweepyException as e:
                     click.secho(
                         "Error importing tweet {}: {}".format(status_id, e), dim=True
                     )
@@ -610,14 +618,18 @@ class Twitter(object):
         click.secho("Calculating how many tweets to re-like and unlike", fg="cyan")
         tweets = []
         for tweet in all_tweets:
-            if tweet.created_at < datetime_threshold and not tweet.is_unliked:
+            if (
+                tweet.created_at.replace(tzinfo=utc)
+                < datetime_threshold.replace(tzinfo=utc)
+                and not tweet.is_unliked
+            ):
                 if tweet.favorited:
                     try:
                         self.api.destroy_favorite(tweet.status_id)
                         tweet.unlike_summarize()
                         tweet.is_unliked = True
                         self.common.session.add(tweet)
-                    except tweepy.error.TweepError as e:
+                    except tweepy.TweepyException as e:
                         click.secho(
                             "Error unliking tweet {}: {}".format(tweet.status_id, e),
                             dim=True,
@@ -638,14 +650,18 @@ class Twitter(object):
         )
         count = 0
         for tweet in tweets:
-            if tweet.created_at < datetime_threshold and not tweet.is_unliked:
+            if (
+                tweet.created_at.replace(tzinfo=utc)
+                < datetime_threshold.replace(tzinfo=utc)
+                and not tweet.is_unliked
+            ):
                 if tweet.favorited:
                     try:
                         self.api.destroy_favorite(tweet.status_id)
                         tweet.unlike_summarize()
                         tweet.is_unliked = True
                         self.common.session.add(tweet)
-                    except tweepy.error.TweepError as e:
+                    except tweepy.TweepyException as e:
                         click.secho(
                             "Error unliking tweet {}: {}".format(tweet.status_id, e),
                             dim=True,
@@ -658,14 +674,14 @@ class Twitter(object):
                             tweet.relike_unlike_summarize()
                             tweet.is_unliked = True
                             self.common.session.add(tweet)
-                        except tweepy.error.TweepError as e:
+                        except tweepy.TweepyException as e:
                             click.secho(
                                 "Error unliking tweet {}: {}".format(
                                     tweet.status_id, e
                                 ),
                                 dim=True,
                             )
-                    except tweepy.error.TweepError as e:
+                    except tweepy.TweepyException as e:
                         click.secho(
                             "Error liking tweet {}: {}".format(tweet.status_id, e),
                             dim=True,
@@ -778,7 +794,7 @@ class Twitter(object):
                             )
                         )
                         count += 1
-                    except tweepy.error.TweepError as e:
+                    except tweepy.TweepyException as e:
                         click.secho(
                             "Error deleting DM {}, id {}: {}".format(
                                 created_timestamp.strftime("%Y-%m-%d"), dm_id, str(e)
@@ -794,7 +810,9 @@ class Twitter(object):
 
             if os.path.isdir(filepath):
                 # Unzipped tweet archive
-                with open(os.path.join(filepath, "data", "tweet.js"), "r", encoding="UTF-8") as f:
+                with open(
+                    os.path.join(filepath, "data", "tweet.js"), "r", encoding="UTF-8"
+                ) as f:
                     # Skip the JS variable assignment at the start of this file
                     f.read(25)
                     tweets = json.load(f)
@@ -807,7 +825,9 @@ class Twitter(object):
                         f.read(25)
                         tweets = json.load(f)
             else:
-                click.echo("Path should be a zipped tweet export file or the extracted directory")
+                click.echo(
+                    "Path should be a zipped tweet export file or the extracted directory"
+                )
                 return
 
             click.echo("Importing {} tweets from {}".format(len(tweets), filepath))

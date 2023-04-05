@@ -1,7 +1,7 @@
 import datetime
 
 from .db import Tweet, Thread
-
+from sqlalchemy.sql import text
 import logging
 
 
@@ -28,43 +28,43 @@ class Common:
             }
 
         last_fetch = self.settings.get("last_fetch")
-        my_tweets = self.session.execute(
+        my_tweets = self.session.execute(text(
             "SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=0".format(
                 int(self.settings.get("user_id"))
-            )
+            ))
         ).first()[0]
         my_retweets = self.session.execute(
-            "SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=1".format(
+            text("SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=0 AND is_retweet=1".format(
                 int(self.settings.get("user_id"))
-            )
+            ))
         ).first()[0]
         my_likes = self.session.execute(
-            "SELECT COUNT(*) FROM tweets WHERE favorited=1"
+            text("SELECT COUNT(*) FROM tweets WHERE favorited=1")
         ).first()[0]
         deleted_tweets = self.session.execute(
-            "SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=0".format(
+            text("SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=0".format(
                 int(self.settings.get("user_id"))
-            )
+            ))
         ).first()[0]
         deleted_retweets = self.session.execute(
-            "SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=1".format(
+            text("SELECT COUNT(*) FROM tweets WHERE user_id={} AND is_deleted=1 AND is_retweet=1".format(
                 int(self.settings.get("user_id"))
-            )
+            ))
         ).first()[0]
         unliked_tweets = self.session.execute(
-            "SELECT COUNT(*) FROM tweets WHERE favorited=1 AND is_unliked=1"
+            text("SELECT COUNT(*) FROM tweets WHERE favorited=1 AND is_unliked=1")
         ).first()[0]
         excluded_tweets = self.session.execute(
-            "SELECT COUNT(*) FROM tweets WHERE user_id={} AND exclude_from_delete=1".format(
+            text("SELECT COUNT(*) FROM tweets WHERE user_id={} AND exclude_from_delete=1".format(
                 int(self.settings.get("user_id"))
-            )
+            ))
         ).first()[0]
         other_tweets = self.session.execute(
-            "SELECT COUNT(*) FROM tweets WHERE user_id!={}".format(
+            text("SELECT COUNT(*) FROM tweets WHERE user_id!={}".format(
                 int(self.settings.get("user_id"))
-            )
+            ))
         ).first()[0]
-        threads = self.session.execute("SELECT COUNT(*) FROM threads").first()[0]
+        threads = self.session.execute(text("SELECT COUNT(*) FROM threads")).first()[0]
         tweets_to_delete = self.get_tweets_to_delete()
 
         return {

@@ -1,5 +1,6 @@
 import click
 import json
+import tweepy
 
 from .db import Tweet
 
@@ -60,7 +61,7 @@ class ImportExport:
                     tweet.exclude_from_delete = True
                     self.common.session.add(tweet)
                     tweet.excluded_fetch_summarize()
-                except tweepy.error.TweepError as e:
+                except tweepy.TweepyException as e:
                     click.echo("Error for tweet {}: {}".format(tweet.status_id, e))
 
         self.common.session.commit()
