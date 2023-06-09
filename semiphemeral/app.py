@@ -53,7 +53,7 @@ def api_user():
     """
     Respond with information about the Twitter user
     """
-    pass
+    return "{}"
 
 
 def main():

@@ -88,6 +88,10 @@ a:hover {
   text-decoration: none;
 }
 
+img {
+  max-width: 100%;
+}
+
 footer {
   position: absolute;
   left: 0;
