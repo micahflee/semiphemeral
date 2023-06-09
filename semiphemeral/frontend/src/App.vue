@@ -96,6 +96,10 @@ img {
   max-width: 100%;
 }
 
+.error-message {
+  color: red;
+}
+
 footer {
   position: absolute;
   left: 0;

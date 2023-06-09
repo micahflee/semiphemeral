@@ -2,7 +2,7 @@
 import { ref } from "vue"
 
 const testCredentialsLoading = ref(false)
-const testCredentialsErrorMessage = ref("")
+const errorMessage = ref("")
 const twitterApiKey = ref("")
 const twitterApiSecret = ref("")
 const twitterAccessToken = ref("")
@@ -24,9 +24,9 @@ function testCreds() {
             testCredentialsLoading.value = false
             response.json().then(function (data) {
                 if (data.error) {
-                    testCredentialsErrorMessage.value = data['error_message']
+                    errorMessage.value = data['error_message']
                 } else {
-                    testCredentialsErrorMessage.value = ""
+                    errorMessage.value = ""
                     alert("Your Twitter API credentials are valid!")
                     window.location.href = "/settings"
                 }
@@ -34,7 +34,7 @@ function testCreds() {
         })
         .catch(function (err) {
             console.log("Error testing credentials", err)
-            testCredentialsErrorMessage.value = err
+            errorMessage.value = err
             testCredentialsLoading.value = false
         })
 }
@@ -104,10 +104,8 @@ function testCreds() {
             <p>
                 <button v-on:click="testCreds()" v-bind:disabled="testCredentialsLoading">Test Twitter API
                     Credentials</button>
-                <span class="test-credentials-error" v-if="testCredentialsErrorMessage.value != ''">{{
-                    testCredentialsErrorMessage
-                }}</span>
             </p>
+            <p class="error-message" v-if="errorMessage.value != ''">{{ errorMessage }}</p>
         </form>
     </div>
 </template>
@@ -154,10 +152,5 @@ label {
 
 input[type="text"] {
     width: 400px;
-}
-
-.test-credentials-error {
-    color: red;
-    margin-left: 20px;
 }
 </style>

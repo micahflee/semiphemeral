@@ -16,7 +16,7 @@ const props = defineProps({
     <template v-if="isConfigured">
       <ul>
         <li>
-          <router-link to="/dashboard">Dashboard</router-link>
+          <router-link to="/">Dashboard</router-link>
         </li>
         <li>
           <router-link to="/tweets">Tweets</router-link>
@@ -32,7 +32,8 @@ const props = defineProps({
         </li>
       </ul>
       <span class="user">
-        <img v-if="userScreenName" :src="userProfileUrl" :title="`Logged in as @${userScreenName}`" />
+        <span>Configured for @{{ userScreenName }}</span>
+        <img v-if="userScreenName" :src="userProfileUrl" :title="`@${userScreenName}`" />
       </span>
     </template>
   </div>

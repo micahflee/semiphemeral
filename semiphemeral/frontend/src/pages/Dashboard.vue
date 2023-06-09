@@ -7,20 +7,11 @@ const props = defineProps({
 })
 
 const loading = ref(false)
-
-const twitterApiKey = ref("")
-const twitterApiSecret = ref("")
-const twitterAccessToken = ref("")
-const twitterAccessTokenSecret = ref("")
-
 </script>
 
 <template>
   <div>
-    <h1>
-      Semiphemeral Dashboard
-      <img class="refresh" @click="fetchJobs()" src="/images/refresh.png" alt="Refresh" title="Refresh" />
-    </h1>
+    <h1>Semiphemeral Dashboard</h1>
 
     <template v-if="loading">
       <p>
