@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue"
 import NavBar from "./layout/NavBar.vue"
+import ConfigureWizard from "./pages/ConfigureWizard.vue"
 
 const userScreenName = ref("")
 const userProfileUrl = ref("")
@@ -15,6 +16,7 @@ fetch("/api/user")
     response.json().then(function (data) {
       userScreenName.value = data["user_screen_name"]
       userProfileUrl.value = data["user_profile_url"]
+      isConfigured.value = data["is_configured"]
     });
   })
   .catch(function (err) {
@@ -23,7 +25,7 @@ fetch("/api/user")
 </script>
 
 <template>
-  <div>
+  <div v-if="isConfigured">
     <NavBar v-bind="{
       userScreenName: userScreenName,
       userProfileUrl: userProfileUrl,
@@ -31,8 +33,10 @@ fetch("/api/user")
     }"></NavBar>
     <router-view v-bind="{
       userScreenName: userScreenName,
-      isConfigured: isConfigured
     }"></router-view>
+  </div>
+  <div v-else>
+    <ConfigureWizard></ConfigureWizard>
   </div>
 </template>
 

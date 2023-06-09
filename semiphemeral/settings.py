@@ -8,6 +8,7 @@ class Settings(object):
         self.default_settings = {
             "twitter_id": "",
             "twitter_screen_name": "",
+            "profile_image_url_https": "",
             "twitter_api_key": "",
             "twitter_api_secret": "",
             "twitter_access_token": "",
@@ -57,7 +58,7 @@ class Settings(object):
         if (
             self.get("twitter_api_key") == ""
             or self.get("twitter_api_secret") == ""
-            or self.get("twitter_access_token_key") == ""
+            or self.get("twitter_access_token") == ""
             or self.get("twitter_access_token_secret") == ""
             or self.get("twitter_screen_name") == ""
         ):
