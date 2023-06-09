@@ -104,5 +104,6 @@ venv.bak/
 .mypy_cache/
 
 # other
+semiphemeral/frontend/node_modules/
 .DS_Store
 .vscode/

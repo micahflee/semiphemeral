@@ -1,129 +1,77 @@
-import click
-
-from datetime import datetime
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy import (
+    create_engine,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+)
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 Base = declarative_base()
 
 
+class JobDetails(Base):
+    __tablename__ = "job_details"
+
+    id = Column(Integer, primary_key=True)
+    job_type = Column(
+        String
+    )  # "fetch", "delete", "delete_dms", "delete_dm_groups", "dm", "block", "unblock"
+    status = Column(
+        String, default="pending"
+    )  # "pending", "active", "finished", "canceled"
+    data = Column(String, default="{}")  # JSON object
+    redis_id = Column(String)
+    scheduled_timestamp = Column(DateTime)
+    started_timestamp = Column(DateTime)
+    finished_timestamp = Column(DateTime)
+
+    def __str__(self):
+        return (
+            f"JobDetails: type={self.job_type}, status={self.status}, data={self.data}"
+        )
+
+
 class Thread(Base):
     __tablename__ = "threads"
+
     id = Column(Integer, primary_key=True)
-    root_status_id = Column(Integer)
+    conversation_id = Column(String)
     should_exclude = Column(Boolean)
 
     tweets = relationship("Tweet", back_populates="thread")
 
-    def __init__(self, root_status_id):
-        self.root_status_id = root_status_id
-        self.should_exclude = False
-
 
 class Tweet(Base):
     __tablename__ = "tweets"
-    id = Column(Integer, primary_key=True)
-    created_at = Column(DateTime)
-    user_id = Column(Integer)  # we download all threads too, including with other users
-    user_screen_name = Column(String)
-    status_id = Column(Integer)
-    lang = Column(String)
-    source = Column(String)
-    source_url = Column(String)
-    text = Column(String)
-    in_reply_to_screen_name = Column(String)
-    in_reply_to_status_id = Column(Integer)
-    in_reply_to_user_id = Column(Integer)
-    retweet_count = Column(Integer)
-    favorite_count = Column(Integer)
-    retweeted = Column(Boolean)
-    favorited = Column(Boolean)
-    is_retweet = Column(Boolean)
-    is_deleted = Column(Boolean)
-    is_unliked = Column(Boolean)
-    exclude_from_delete = Column(Boolean)
 
+    id = Column(Integer, primary_key=True)
+    twitter_id = Column(String)
+    created_at = Column(DateTime)
+    text = Column(String)
+    is_retweet = Column(Boolean)
+    retweet_id = Column(String)
+    is_reply = Column(Boolean)
+    retweet_count = Column(Integer)
+    like_count = Column(Integer)
+    exclude_from_delete = Column(Boolean)
+    is_deleted = Column(Boolean)
     thread_id = Column(Integer, ForeignKey("threads.id"))
+
     thread = relationship("Thread", back_populates="tweets")
 
-    def __init__(self, status):
-        self.created_at = status.created_at
-        self.user_id = status.author.id
-        self.user_screen_name = status.author.screen_name
-        self.status_id = status.id
-        self.lang = status.lang
-        self.source = status.source
-        self.source_url = status.source_url
-        self.text = status.full_text
 
-        # These fields don't exist in imported non-reply tweets
-        for field in ('in_reply_to_screen_name', 'in_reply_to_status_id', 'in_reply_to_user_id'):
-            setattr(self, field, getattr(status, field, None))
+class Like(Base):
+    __tablename__ = "likes"
 
-        self.retweet_count = status.retweet_count
-        self.favorite_count = status.favorite_count
-        self.retweeted = status.retweeted
-        self.favorited = status.favorited
-        self.is_retweet = hasattr(status, "retweeted_status")
-        self.is_deleted = False
-        self.is_unliked = False
-        self.exclude_from_delete = False
-
-    def already_saved(self, session):
-        """
-        Returns true if a tweet with this status_id is already in the db
-        """
-        tweet = session.query(Tweet).filter_by(status_id=self.status_id).first()
-        if tweet:
-            click.secho(
-                "Skipped {} @{}, id={}".format(
-                    self.created_at.strftime("%Y-%m-%d"),
-                    self.user_screen_name,
-                    self.status_id,
-                ),
-                dim=True,
-            )
-            return True
-
-    def fetch_summarize(self):
-        click.echo("Fetched {}".format(self.summarize_string()))
-
-    def unretweet_summarize(self):
-        click.echo("Unretweeted {}".format(self.summarize_string(True)))
-
-    def unlike_summarize(self):
-        click.echo("Unliked {}".format(self.summarize_string()))
-
-    def relike_unlike_summarize(self):
-        click.echo("Reliked and unliked {}".format(self.summarize_string()))
-
-    def delete_summarize(self):
-        click.echo("Deleted {}".format(self.summarize_string()))
-
-    def excluded_summarize(self):
-        click.echo("Excluded from deletion {}".format(self.summarize_string()))
-
-    def excluded_fetch_summarize(self):
-        click.echo(
-            "Fetched and excluded from deletion {}".format(self.summarize_string())
-        )
-
-    def summarize_string(self, include_rt_user=False):
-        if include_rt_user:
-            return "{} @{} {}, id={}".format(
-                self.created_at.strftime("%Y-%m-%d"),
-                self.user_screen_name,
-                self.text.split(":")[0],
-                self.status_id,
-            )
-        else:
-            return "{} @{}, id={}".format(
-                self.created_at.strftime("%Y-%m-%d"),
-                self.user_screen_name,
-                self.status_id,
-            )
+    id = Column(Integer, primary_key=True)
+    twitter_id = Column(String)
+    created_at = Column(DateTime)
+    author_id = Column(String)
+    is_deleted = Column(Boolean)
+    is_fascist = Column(Boolean)
 
 
 def create_db(database_path):

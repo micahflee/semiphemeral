@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "semiphemeral"
+version = "1.0.0"
+description = "Automatically delete your old tweets, except for the ones you want to keep"
+authors = ["Micah Lee <micah@micahflee.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Flask = "^2.3.2"
+tweepy = "^4.14.0"
+waitress = "^2.1.2"
+sqlalchemy = "^2.0.15"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+semiphemeral = "semiphemeral.app:main"
+build = "semiphemeral.dev:build"

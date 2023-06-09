@@ -1,5 +1,9 @@
 # Semiphemeral Changelog
 
+## 1.0
+
+* Complete rewrite based on Semiphemeral.com code
+
 ## 0.7
 
 * Feature: Support for proxies, including Tor

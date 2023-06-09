@@ -6,28 +6,32 @@ class Settings(object):
     def __init__(self, filename):
         self.filename = filename
         self.default_settings = {
-            "twitter_id": "",
-            "twitter_screen_name": "",
-            "twitter_api_key": "",
-            "twitter_api_secret": "",
-            "twitter_access_token": "",
-            "twitter_access_token_secret": "",
-            "delete_tweets": False,
+            "api_key": "",
+            "api_secret": "",
+            "access_token_key": "",
+            "access_token_secret": "",
+            "username": "",
+            "user_id": None,
+            "delete_tweets": True,
             "tweets_days_threshold": 30,
-            "tweets_enable_retweet_threshold": True,
-            "tweets_retweet_threshold": 20,
-            "tweets_enable_like_threshold": True,
-            "tweets_like_threshold": 20,
+            "tweets_retweet_threshold": 100,
+            "tweets_like_threshold": 100,
             "tweets_threads_threshold": True,
-            "retweets_likes": False,
+            "retweets_likes": True,
             "retweets_likes_delete_retweets": True,
             "retweets_likes_retweets_threshold": 30,
             "retweets_likes_delete_likes": True,
             "retweets_likes_likes_threshold": 60,
-            "direct_messages": False,
-            "direct_messages_threshold": 7,
+            "delete_dms": True,
+            "dms_days_threshold": 14,
             "since_id": None,
             "last_fetch": None,
+            "unlike_ignore_list": [],
+            "logging": False,
+            "log_filename": os.path.expanduser("~/.semiphemeral/log"),
+            "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            'proxy': "",
+            'use_tor': False,
         }
         self.load()
 
@@ -55,11 +59,19 @@ class Settings(object):
 
     def is_configured(self):
         if (
-            self.get("twitter_api_key") == ""
-            or self.get("twitter_api_secret") == ""
-            or self.get("twitter_access_token_key") == ""
-            or self.get("twitter_access_token_secret") == ""
-            or self.get("twitter_screen_name") == ""
+            self.get("api_key") == ""
+            or self.get("api_secret") == ""
+            or self.get("access_token_key") == ""
+            or self.get("access_token_secret") == ""
+            or self.get("username") == ""
         ):
             return False
         return True
+
+    def unlike_should_ignore(self, status_id):
+        return status_id in self.get("unlike_ignore_list")
+
+    def unlike_ignore(self, status_id):
+        if status_id not in self.settings["unlike_ignore_list"]:
+            self.settings["unlike_ignore_list"].append(status_id)
+        self.save()
