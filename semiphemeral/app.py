@@ -19,15 +19,17 @@ app = Flask(__name__)
 
 # Static assets
 
+dist_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "frontend/dist")
+
 
 @app.route("/assets/<path:filename>")
 def static_assets(filename):
-    return send_from_directory(f"frontend/dist/assets", filename)
+    return send_from_directory(os.path.join(dist_path, "assets"), filename)
 
 
 @app.route("/images/<path:filename>")
 def static_images(filename):
-    return send_from_directory(f"frontend/dist/images", filename)
+    return send_from_directory(os.path.join(dist_path, "images"), filename)
 
 
 # Frontend routes
@@ -40,10 +42,7 @@ def static_images(filename):
 @app.route("/settings")
 @app.route("/faq")
 def web_frontend():
-    with open(f"frontend/dist/index.html") as f:
-        body = f.read()
-
-    return body
+    return send_from_directory(dist_path, "index.html")
 
 
 # API routes

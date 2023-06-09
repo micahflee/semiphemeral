@@ -13,26 +13,28 @@ const props = defineProps({
         <img src="/images/logo-small.png" />
       </a>
     </span>
-    <ul>
-      <li>
-        <router-link to="/dashboard">Dashboard</router-link>
-      </li>
-      <li>
-        <router-link to="/tweets">Tweets</router-link>
-      </li>
-      <li>
-        <router-link to="/export">Export</router-link>
-      </li>
-      <li>
-        <router-link to="/dms">DMs</router-link>
-      </li>
-      <li>
-        <router-link to="/settings">Settings</router-link>
-      </li>
-    </ul>
-    <span class="user" v-if="isConfigured">
-      <img v-if="userScreenName" :src="userProfileUrl" :title="`Logged in as @${userScreenName}`" />
-    </span>
+    <template v-if="isConfigured">
+      <ul>
+        <li>
+          <router-link to="/dashboard">Dashboard</router-link>
+        </li>
+        <li>
+          <router-link to="/tweets">Tweets</router-link>
+        </li>
+        <li>
+          <router-link to="/export">Export</router-link>
+        </li>
+        <li>
+          <router-link to="/dms">DMs</router-link>
+        </li>
+        <li>
+          <router-link to="/settings">Settings</router-link>
+        </li>
+      </ul>
+      <span class="user">
+        <img v-if="userScreenName" :src="userProfileUrl" :title="`Logged in as @${userScreenName}`" />
+      </span>
+    </template>
   </div>
 </template>
 
@@ -84,3 +86,4 @@ span.user span {
   vertical-align: middle;
   font-size: 0.8em;
 }
+</style>

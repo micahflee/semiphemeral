@@ -14,7 +14,8 @@ const loading = ref(false)
   <div>
     <h1>
       Semiphemeral Dashboard
-      <img class="refresh" @click="fetchJobs()" src="/images/refresh.png" alt="Refresh" title="Refresh" />
+      <img v-if="isConfigured" class="refresh" @click="fetchJobs()" src="/images/refresh.png" alt="Refresh"
+        title="Refresh" />
     </h1>
 
     <template v-if="loading">
