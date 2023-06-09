@@ -7,6 +7,12 @@ const props = defineProps({
 })
 
 const loading = ref(false)
+
+function downloadTwitterData() {
+}
+
+function deleteTwitterData() {
+}
 </script>
 
 <template>
@@ -19,7 +25,16 @@ const loading = ref(false)
       </p>
     </template>
     <template v-else>
-      <p>Not implemented</p>
+      <p>
+        <button class="primary" v-on:click="downloadTwitterData()" v-bind:disabled="loading">Download Twitter
+          Data</button>
+      </p>
+      <p>This downloads all of your tweets and likes since the last time you downloaded Twitter data.</p>
+      <p>
+        <button class="primary" v-on:click="deleteTwitterData()" v-bind:disabled="loading">Delete Twitter Data</button>
+      </p>
+      <p>This deletes your tweets, retweets, likes, and DMs based on your <router-link
+          to="/settings">settings</router-link>.</p>
     </template>
   </div>
 </template>
@@ -29,36 +44,6 @@ ul.buttons {
   list-style: none;
   padding: 0;
   margin-left: 20px;
-}
-
-button.start,
-button.download {
-  background-color: #4caf50;
-  border: none;
-  color: white;
-  padding: 5px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius: 5px;
-  margin: 0 0 5px 0;
-}
-
-button.pause,
-button.reactivate {
-  background-color: #624caf;
-  border: none;
-  color: white;
-  padding: 5px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius: 5px;
-  margin: 0 0 5px 0;
 }
 
 ul.jobs {

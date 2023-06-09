@@ -116,6 +116,9 @@ getSettings()
     <h1>Choose what you'd like Semiphemeral to automatically delete</h1>
     <p class="error-message" v-if="errorMessage.value != ''">{{ errorMessage }}</p>
 
+    <p>When you're done choosing the settings you want, go to the <router-link to="/">Dashboard</router-link> to download
+      and delete your Twitter data.</p>
+
     <template v-if="loading">
       <p>
         <img src="/images/loading.gif" alt="Loading" />

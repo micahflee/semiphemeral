@@ -4,17 +4,17 @@ import json
 
 from waitress import serve
 from flask import Flask, send_from_directory, jsonify, request
+from sqlalchemy import select
 
 from .settings import Settings
-from .db import create_db
-from .common import create_tweepy_client_v1_1
-
+from .db import create_db, Job
+from .common import create_tweepy_client_v1_1, add_job
 
 # Initialize settings and database
 base = os.path.expanduser("~/.semiphemeral")
 os.makedirs(base, mode=0o700, exist_ok=True)
 settings = Settings(os.path.join(base, "settings.json"))
-session = create_db(os.path.join(base, "data.db"))
+db_session = create_db(os.path.join(base, "data.db"))
 
 # Initialize Flask
 app = Flask(__name__)
@@ -138,6 +138,104 @@ def api_test_creds():
     settings.save()
 
     return jsonify({"error": False})
+
+
+@app.route("/api/dashboard", methods=["GET", "POST"])
+def api_dashboard():
+    """
+    GET: Respond with the lists of active, pending, and finished jobs
+    POST: Download or delete twitter data
+    """
+    if request.method == "GET":
+        pending_jobs = db_session.scalars(
+            select(Job).where(Job.status == "pending").order_by(Job.scheduled_timestamp)
+        ).fetchall()
+        active_jobs = db_session.scalars(
+            select(Job).where(Job.status == "active").order_by(Job.started_timestamp)
+        ).fetchall()
+        finished_jobs = db_session.scalars(
+            select(Job)
+            .where(Job.status == "finished")
+            .order_by(Job.finished_timestamp.desc())
+        ).fetchall()
+
+        def to_client(jobs):
+            jobs_json = []
+            for job in jobs:
+                if job.scheduled_timestamp:
+                    scheduled_timestamp = job.scheduled_timestamp.timestamp()
+                else:
+                    scheduled_timestamp = None
+                if job.started_timestamp:
+                    started_timestamp = job.started_timestamp.timestamp()
+                else:
+                    started_timestamp = None
+                if job.finished_timestamp:
+                    finished_timestamp = job.finished_timestamp.timestamp()
+                else:
+                    finished_timestamp = None
+
+                jobs_json.append(
+                    {
+                        "id": job.id,
+                        "job_type": job.job_type,
+                        "status": job.status,
+                        "progress_status": job.progress_status,
+                        "progress_tweets_downloaded": job.progress_tweets_downloaded,
+                        "progress_likes_downloaded": job.progress_likes_downloaded,
+                        "progress_tweets_deleted": job.progress_tweets_deleted,
+                        "progress_retweets_deleted": job.progress_retweets_deleted,
+                        "progress_likes_deleted": job.progress_likes_deleted,
+                        "progress_dms_deleted": job.progress_dms_deleted,
+                        "scheduled_timestamp": scheduled_timestamp,
+                        "started_timestamp": started_timestamp,
+                        "finished_timestamp": finished_timestamp,
+                    }
+                )
+            return jobs_json
+
+        return jsonify(
+            {
+                "pending_jobs": to_client(pending_jobs),
+                "active_jobs": to_client(active_jobs),
+                "finished_jobs": to_client(finished_jobs),
+            }
+        )
+
+    elif request.method == "POST":
+        """
+        If action is download, create a download job
+        If action is delete, create a delete job
+        """
+        try:
+            data = json.loads(request.data)
+        except Exception as e:
+            print(f"Error parsing JSON: {e}")
+            return jsonify({"error": True, "error_message": "Error parsing JSON"})
+
+        # Validate
+        valid = _api_validate({"action": str}, data)
+        if not valid["valid"]:
+            return jsonify({"error": True, "error_message": valid["message"]})
+
+        if data["action"] != "download" and data["action"] != "delete":
+            return jsonify(
+                {
+                    "error": True,
+                    "error_message": "Action must be 'download' or 'delete'",
+                }
+            )
+
+        if data["action"] == "download":
+            add_job("download")
+
+        elif data["action"] == "delete":
+            add_job("delete")
+
+        return jsonify(True)
+
+    else:
+        return jsonify({"error": True, "error_message": "Bad request"})
 
 
 @app.route("/api/settings", methods=["GET", "POST"])

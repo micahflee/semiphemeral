@@ -114,4 +114,32 @@ footer {
 footer p {
   margin: 0 10px;
 }
+
+button.primary {
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px;
+  margin: 0 0 5px 0;
+}
+
+button.secondary {
+  background-color: #624caf;
+  border: none;
+  color: white;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px;
+  margin: 0 0 5px 0;
+}
 </style>

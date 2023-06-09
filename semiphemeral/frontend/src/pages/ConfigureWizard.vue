@@ -102,7 +102,7 @@ function testCreds() {
                 Token
                 Secret above, click the following button to test your API credentials to see if they work.</p>
             <p>
-                <button v-on:click="testCreds()" v-bind:disabled="testCredentialsLoading">Test Twitter API
+                <button class="primary" v-on:click="testCreds()" v-bind:disabled="testCredentialsLoading">Test Twitter API
                     Credentials</button>
             </p>
             <p class="error-message" v-if="errorMessage.value != ''">{{ errorMessage }}</p>
@@ -118,20 +118,6 @@ img.logo {
 
 p.larger {
     font-size: 135%;
-}
-
-button {
-    background-color: #4caf50;
-    border: none;
-    color: white;
-    padding: 5px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 5px;
-    margin: 0 0 5px 0;
 }
 
 .center {

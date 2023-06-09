@@ -12,26 +12,27 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 Base = declarative_base()
 
 
-class JobDetails(Base):
-    __tablename__ = "job_details"
+class Job(Base):
+    __tablename__ = "jobs"
 
     id = Column(Integer, primary_key=True)
-    job_type = Column(
-        String
-    )  # "fetch", "delete", "delete_dms", "delete_dm_groups", "dm", "block", "unblock"
+    job_type = Column(String)  # "download", "delete", "delete_dms", "delete_dm_groups"
     status = Column(
         String, default="pending"
     )  # "pending", "active", "finished", "canceled"
-    data = Column(String, default="{}")  # JSON object
-    redis_id = Column(String)
+    progress_status = Column(String, default="")
+    progress_tweets_downloaded = Column(Integer, default=0)
+    progress_likes_downloaded = Column(Integer, default=0)
+    progress_tweets_deleted = Column(Integer, default=0)
+    progress_retweets_deleted = Column(Integer, default=0)
+    progress_likes_deleted = Column(Integer, default=0)
+    progress_dms_deleted = Column(Integer, default=0)
     scheduled_timestamp = Column(DateTime)
     started_timestamp = Column(DateTime)
     finished_timestamp = Column(DateTime)
 
     def __str__(self):
-        return (
-            f"JobDetails: type={self.job_type}, status={self.status}, data={self.data}"
-        )
+        return f"Job: type={self.job_type}, status={self.status}, data={self.data}"
 
 
 class Thread(Base):

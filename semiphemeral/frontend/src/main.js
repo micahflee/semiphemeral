@@ -7,15 +7,13 @@ import Tweets from "./pages/Tweets.vue";
 import Export from "./pages/Export.vue";
 import DirectMessages from "./pages/DirectMessages.vue";
 import Settings from "./pages/Settings.vue";
-import Faq from "./pages/Faq.vue";
 
 const routes = [
     { path: '/', name: 'dashboard', component: Dashboard },
     { path: '/tweets', name: 'tweets', component: Tweets },
     { path: '/export', name: 'export', component: Export },
     { path: '/dms', name: 'dms', component: DirectMessages },
-    { path: '/settings', name: 'settings', component: Settings },
-    { path: '/faq', name: 'faq', component: Faq }
+    { path: '/settings', name: 'settings', component: Settings }
 ]
 
 const router = createRouter({
