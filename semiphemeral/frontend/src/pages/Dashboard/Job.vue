@@ -11,81 +11,49 @@ function humanReadableTimestamp(timestamp) {
     return date.toLocaleDateString() + " at " + date.toLocaleTimeString()
 }
 
-function progressStatus() {
-    try {
-        var p = JSON.parse(props.job.data)
-        if (Object.hasOwn(p, "progress")) {
-            if (Object.hasOwn(p['progress'], "status")) {
-                return p['progress']['status']
-            } else {
-                return "Active"
-            }
-        }
-    } catch (error) {
-        console.log("JSON decoding error:", error, props.job.data)
-        return ""
-    }
-}
-
 function formatProgress() {
-    try {
-        var p = JSON.parse(props.job.data)
-        if (Object.hasOwn(p, "progress")) {
-            var tweetsFetched = p['progress']['tweets_fetched']
-            var likesFetched = p['progress']['likes_fetched']
-            var tweetsDeleted = p['progress']['tweets_deleted']
-            var retweetsDeleted = p['progress']['retweets_deleted']
-            var likesDeleted = p['progress']['likes_deleted']
-            var dmsDeleted = p['progress']['dms_deleted']
-            var dmsSkipped = p['progress']['dms_skipped']
+    var downloaded = (props.job.progress_tweets_downloaded > 0 || props.job.progress_likes_downloaded > 0)
+    var deleted = (props.job.progress_tweets_deleted > 0 || props.job.progress_retweets_deleted > 0 || props.job.progress_likes_deleted > 0 || props.job.progress_dms_deleted > 0 || props.job.progress_dms_skipped > 0)
 
-            var downloaded = (tweetsFetched !== undefined || likesFetched !== undefined)
-            var deleted = (tweetsDeleted !== undefined || retweetsDeleted !== undefined || likesDeleted !== undefined || dmsDeleted !== undefined || dmsSkipped !== undefined)
+    var progress = ""
 
-            var progress = ""
-
-            if (downloaded) {
-                progress += "Downloaded "
-                if (tweetsFetched !== undefined) {
-                    progress += tweetsFetched.toLocaleString("en-US") + " tweets, "
-                }
-                if (likesFetched !== undefined) {
-                    progress += likesFetched.toLocaleString("en-US") + " likes, "
-                }
-            }
-            if (deleted) {
-                if (downloaded) {
-                    progress += "and deleted "
-                } else {
-                    progress += "Deleted "
-                }
-                if (tweetsDeleted !== undefined) {
-                    progress += tweetsDeleted.toLocaleString("en-US") + " tweets, "
-                }
-                if (retweetsDeleted !== undefined) {
-                    progress += retweetsDeleted.toLocaleString("en-US") + " retweets, "
-                }
-                if (likesDeleted !== undefined) {
-                    progress += likesDeleted.toLocaleString("en-US") + " likes, "
-                }
-                if (dmsDeleted !== undefined) {
-                    progress += dmsDeleted.toLocaleString("en-US") + " DMs"
-                    if (dmsSkipped !== undefined) {
-                        progress += " (skipped " + dmsSkipped.toLocaleString("en-US") + ")"
-                    }
-                }
-            }
-
-            if (progress.endsWith(", ")) {
-                progress = progress.substring(0, progress.length - 2)
-            }
-
-            return progress
+    if (downloaded) {
+        progress += "Downloaded "
+        if (props.job.progress_tweets_downloaded > 0) {
+            progress += props.job.progress_tweets_downloaded.toLocaleString("en-US") + " tweets, "
         }
-    } catch (error) {
-        console.log("JSON decoding error:", error, props.job.data)
-        return ""
+        if (props.job.progress_likes_downloaded !== undefined) {
+            progress += props.job.progress_likes_downloaded.toLocaleString("en-US") + " likes, "
+        }
     }
+    if (deleted) {
+        if (downloaded) {
+            progress += "and deleted "
+        } else {
+            progress += "Deleted "
+        }
+        if (props.job.progress_tweets_deleted > 0) {
+            progress += props.job.progress_tweets_deleted.toLocaleString("en-US") + " tweets, "
+        }
+        if (props.job.progress_retweets_deleted > 0) {
+            progress += props.job.progress_retweets_deleted.toLocaleString("en-US") + " retweets, "
+        }
+        if (props.job.progress_likes_deleted > 0) {
+            progress += props.job.progress_likes_deleted.toLocaleString("en-US") + " likes, "
+        }
+        if (props.job.progress_dms_deleted > 0 || props.job.progress_dms_skipped > 0) {
+            progress += props.job.progress_dms_deleted.toLocaleString("en-US") + " DMs"
+            if (props.job.progress_dms_skipped > 0) {
+                progress += " (skipped " + props.job.progress_dms_skipped.toLocaleString("en-US") + ")"
+            }
+        }
+    }
+
+    if (progress.endsWith(", ")) {
+        progress = progress.substring(0, progress.length - 2)
+    }
+
+    return progress
 }
 
 function scheduledTimestampInThePast() {
@@ -95,15 +63,26 @@ function scheduledTimestampInThePast() {
         return Math.floor(props.job['scheduled_timestamp'] * 1000) <= Date.now()
     }
 }
+
+function cancelJob() {
+    if (confirm("Are you sure you want to cancel this job?")) {
+        fetch("/api/jobs/" + props.job.id + "/cancel", { method: "POST" }).then(response => {
+            if (response.ok) {
+                location.reload()
+            } else {
+                alert("Failed to cancel job")
+            }
+        })
+    }
+}
 </script>
 
 <template>
     <div :class="job.status">
         <template v-if="job.status == 'pending'">
-            <template v-if="job.job_type == 'fetch'">
+            <template v-if="job.job_type == 'download'">
                 <p class="status" v-if="scheduledTimestampInThePast()">
-                    Waiting to download all of your tweets and likes as soon as it's your
-                    turn in the queue
+                    Waiting to download all of your tweets and likes
                 </p>
                 <p class="status" v-else>
                     Waiting to download all of your tweets and likes, scheduled for
@@ -112,8 +91,7 @@ function scheduledTimestampInThePast() {
             </template>
             <template v-else-if="job.job_type == 'delete_dms'">
                 <p class="status" v-if="scheduledTimestampInThePast()">
-                    Waiting to delete all of your old direct messages as soon as it's your
-                    turn in the queue
+                    Waiting to delete all of your old direct messages
                 </p>
                 <p class="status" v-else>
                     Waiting to delete all of your old direct messages, scheduled for
@@ -122,8 +100,7 @@ function scheduledTimestampInThePast() {
             </template>
             <template v-else-if="job.job_type == 'delete_dm_groups'">
                 <p class="status" v-if="scheduledTimestampInThePast()">
-                    Waiting to delete all of your old group direct messages as soon as
-                    it's your turn in the queue
+                    Waiting to delete all of your old group direct messages
                 </p>
                 <p class="status" v-else>
                     Waiting to delete all of your old group direct messages, scheduled for
@@ -132,8 +109,7 @@ function scheduledTimestampInThePast() {
             </template>
             <template v-else-if="job.job_type == 'delete'">
                 <p class="status" v-if="scheduledTimestampInThePast()">
-                    Waiting to delete your old tweets, likes, and/or direct messages as
-                    soon as it's your turn in the queue
+                    Waiting to delete your old tweets, likes, and/or direct messages
                 </p>
                 <p class="status" v-else>
                     Waiting to delete your old tweets, likes, and/or direct messages,
@@ -141,23 +117,28 @@ function scheduledTimestampInThePast() {
                     <em>{{ humanReadableTimestamp(job.scheduled_timestamp) }}</em>
                 </p>
             </template>
+            <p><button class="secondary" v-on:click="cancelJob()">Cancel Job</button></p>
         </template>
 
         <template v-else-if="job.status == 'active'">
-            <p class="status">{{ progressStatus() }}</p>
+            <p class="status">{{ job.progress_status }}</p>
             <p class="progress">
                 Started
                 <em>{{ humanReadableTimestamp(job.started_timestamp) }}</em>
                 <br />{{ formatProgress() }}
             </p>
+            <p><button class="secondary" v-on:click="cancelJob()">Cancel Job</button></p>
         </template>
 
-        <template v-else-if="job.status == 'finished'">
+        <template v-else-if="job.status == 'finished' || job.status == 'canceled' || job.status == 'failed'">
             <p class="finished">
                 <span class="finished-timestamp">{{
-                        humanReadableTimestamp(job.finished_timestamp)
+                    humanReadableTimestamp(job.finished_timestamp)
                 }}</span>
+                <span v-if="job.status == 'canceled' || job.status == 'failed'" class="canceled-or-failed-status">{{
+                    job.status }}</span>
                 <span class="progress">{{ formatProgress() }}</span>
+                <span v-if="job.status == 'canceled' || job.status == 'failed'">{{ job.progress_status }}</span>
             </p>
         </template>
     </div>
@@ -191,6 +172,13 @@ function scheduledTimestampInThePast() {
     display: inline-block;
     font-size: 0.9em;
     color: #999999;
+}
+
+.finished .canceled-or-failed-status {
+    margin-right: 0.5em;
+    display: inline-block;
+    font-size: 0.9em;
+    color: red;
 }
 
 .finished .progress {

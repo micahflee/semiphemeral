@@ -19,7 +19,7 @@ class Job(Base):
     job_type = Column(String)  # "download", "delete", "delete_dms", "delete_dm_groups"
     status = Column(
         String, default="pending"
-    )  # "pending", "active", "finished", "canceled"
+    )  # "pending", "active", "finished", "canceled", "failed"
     progress_status = Column(String, default="")
     progress_tweets_downloaded = Column(Integer, default=0)
     progress_likes_downloaded = Column(Integer, default=0)
@@ -27,12 +27,43 @@ class Job(Base):
     progress_retweets_deleted = Column(Integer, default=0)
     progress_likes_deleted = Column(Integer, default=0)
     progress_dms_deleted = Column(Integer, default=0)
+    progress_dms_skipped = Column(Integer, default=0)
     scheduled_timestamp = Column(DateTime)
     started_timestamp = Column(DateTime)
     finished_timestamp = Column(DateTime)
 
     def __str__(self):
-        return f"Job: type={self.job_type}, status={self.status}, data={self.data}"
+        return f"Job: type={self.job_type}, status={self.status}"
+
+    def to_dict(self):
+        if self.scheduled_timestamp:
+            scheduled_timestamp = self.scheduled_timestamp.timestamp()
+        else:
+            scheduled_timestamp = None
+        if self.started_timestamp:
+            started_timestamp = self.started_timestamp.timestamp()
+        else:
+            started_timestamp = None
+        if self.finished_timestamp:
+            finished_timestamp = self.finished_timestamp.timestamp()
+        else:
+            finished_timestamp = None
+        return {
+            "id": self.id,
+            "job_type": self.job_type,
+            "status": self.status,
+            "progress_status": self.progress_status,
+            "progress_tweets_downloaded": self.progress_tweets_downloaded,
+            "progress_likes_downloaded": self.progress_likes_downloaded,
+            "progress_tweets_deleted": self.progress_tweets_deleted,
+            "progress_retweets_deleted": self.progress_retweets_deleted,
+            "progress_likes_deleted": self.progress_likes_deleted,
+            "progress_dms_deleted": self.progress_dms_deleted,
+            "progress_dms_skipped": self.progress_dms_skipped,
+            "scheduled_timestamp": scheduled_timestamp,
+            "started_timestamp": started_timestamp,
+            "finished_timestamp": finished_timestamp,
+        }
 
 
 class Thread(Base):
@@ -72,7 +103,6 @@ class Like(Base):
     created_at = Column(DateTime)
     author_id = Column(String)
     is_deleted = Column(Boolean)
-    is_fascist = Column(Boolean)
 
 
 def create_db(database_path):

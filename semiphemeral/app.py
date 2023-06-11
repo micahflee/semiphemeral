@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 import os
 import json
+import threading
+from datetime import datetime
 
-from waitress import serve
 from flask import Flask, send_from_directory, jsonify, request
-from sqlalchemy import select
+from flask_socketio import SocketIO
+from sqlalchemy import select, or_
 
 from .settings import Settings
 from .db import create_db, Job
 from .common import create_tweepy_client_v1_1, add_job
+from .jobs import run_jobs
 
 # Initialize settings and database
 base = os.path.expanduser("~/.semiphemeral")
@@ -18,6 +21,8 @@ db_session = create_db(os.path.join(base, "data.db"))
 
 # Initialize Flask
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.urandom(32)
+socketio = SocketIO(app)
 
 # Helpers
 
@@ -138,7 +143,7 @@ def api_dashboard():
         ).fetchall()
         finished_jobs = db_session.scalars(
             select(Job)
-            .where(Job.status == "finished")
+            .where(or_(Job.status == "finished", Job.status == "canceled", Job.status == "failed"))
             .order_by(Job.finished_timestamp.desc())
         ).fetchall()
 
@@ -170,6 +175,7 @@ def api_dashboard():
                         "progress_retweets_deleted": job.progress_retweets_deleted,
                         "progress_likes_deleted": job.progress_likes_deleted,
                         "progress_dms_deleted": job.progress_dms_deleted,
+                        "progress_dms_skipped": job.progress_dms_skipped,
                         "scheduled_timestamp": scheduled_timestamp,
                         "started_timestamp": started_timestamp,
                         "finished_timestamp": finished_timestamp,
@@ -210,16 +216,33 @@ def api_dashboard():
             )
 
         if data["action"] == "download":
-            add_job("download")
+            add_job(db_session, "download")
 
         elif data["action"] == "delete":
-            add_job("delete")
+            add_job(db_session, "delete")
 
-        return jsonify(True)
+        return jsonify({"error": False})
 
     else:
         return jsonify({"error": True, "error_message": "Bad request"})
 
+
+@app.route("/api/jobs/<job_id>/cancel", methods=["POST"])
+def api_job_cancel(job_id):
+    print(f"Canceling job {job_id}")
+    job = db_session.scalar(select(Job).where(Job.id == job_id))
+    if not job:
+        return jsonify({"error": True, "error_message": "Job not found"})
+
+    if job.status != "pending" and job.status != "active":
+        return jsonify({"error": True, "error_message": "Job is not pending or active"})
+
+    job.status = "canceled"
+    job.progress_status = "Canceled"
+    job.finished_timestamp = datetime.now()
+    db_session.commit()
+
+    return jsonify({"error": False})
 
 @app.route("/api/settings", methods=["GET", "POST"])
 def api_settings():
@@ -228,12 +251,7 @@ def api_settings():
     POST: Update the settings
     """
     if request.method == "GET":
-        return jsonify(
-            {
-                "is_configured": True,
-                "settings": settings.get_all()
-            }
-        )
+        return jsonify({"is_configured": True, "settings": settings.get_all()})
 
     elif request.method == "POST":
         try:
@@ -259,7 +277,6 @@ def api_settings():
                 "retweets_likes_likes_threshold": int,
                 "direct_messages": bool,
                 "direct_messages_threshold": int,
-                "download_all_tweets": bool,
             },
             data,
         )
@@ -297,20 +314,32 @@ def api_settings():
         settings.set("direct_messages", data["direct_messages"])
         settings.set("direct_messages_threshold", direct_messages_threshold)
 
-        # Does the user want to force downloading all tweets next time?
-        if data["download_all_tweets"]:
-            settings.set("since_id", None)
-
         settings.save()
 
         # Validate API credentials
         return api_test_creds()
 
 
+# SocketIO events
+
+
+@socketio.on("connect")
+def handle_connect():
+    print("Client connected")
+
+
 def main():
+    # Start the function in a background thread
+    thread = threading.Thread(target=run_jobs, args=(socketio, db_session, settings,))
+    thread.start()
+
+    # Start the web server
     print("Use Semiphemeral at: http://localhost:8080/")
     print("Press CTRL-C to quit")
-    serve(app, listen="*:8080")
+    socketio.run(app, host='0.0.0.0', port=8080)
+
+    # Wait for the background thread to finish
+    thread.join()
 
 
 if __name__ == "__main__":

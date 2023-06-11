@@ -23,7 +23,6 @@ const retweetsLikesDeleteLikes = ref(props.settings.retweets_likes_delete_likes)
 const retweetsLikesLikesThreshold = ref(props.settings.retweets_likes_likes_threshold)
 const directMessages = ref(props.settings.direct_messages)
 const directMessagesThreshold = ref(props.settings.direct_messages_threshold)
-const downloadAllTweets = ref(false)
 
 function onSubmit() {
   loading.value = true
@@ -49,7 +48,6 @@ function onSubmit() {
       retweets_likes_likes_threshold: Number(retweetsLikesLikesThreshold.value),
       direct_messages: directMessages.value,
       direct_messages_threshold: Number(directMessagesThreshold.value),
-      download_all_tweets: downloadAllTweets.value,
     }),
   })
     .then(function (response) {
@@ -198,13 +196,6 @@ function onSubmit() {
             <router-link to="/dms">Learn more</router-link>&nbsp;about how this works.
           </p>
         </fieldset>
-
-        <p v-if="settings.since_id != null">
-          <label>
-            <input type="checkbox" v-model="downloadAllTweets" />
-            Force Semiphemeral to download all of my tweets again next time, instead of just the newest ones
-          </label>
-        </p>
 
         <p>
           <button class="primary" :disabled="loading" type="submit">Save Settings</button>
