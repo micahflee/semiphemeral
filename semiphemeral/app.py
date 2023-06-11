@@ -74,23 +74,6 @@ def web_frontend():
 # API routes
 
 
-@app.route("/api/user")
-def api_user():
-    """
-    Respond with information about the Twitter user
-    """
-    if settings.is_configured():
-        return jsonify(
-            {
-                "is_configured": True,
-                "user_screen_name": settings.get("twitter_screen_name"),
-                "user_profile_url": settings.get("profile_image_url_https"),
-            }
-        )
-    else:
-        return jsonify({"is_configured": False})
-
-
 @app.route("/api/test-creds", methods=["POST"])
 def api_test_creds():
     """
@@ -245,42 +228,10 @@ def api_settings():
     POST: Update the settings
     """
     if request.method == "GET":
-        has_fetched = settings.get("since_id") != None
         return jsonify(
             {
-                "has_fetched": has_fetched,
-                "twitter_api_key": settings.get("twitter_api_key"),
-                "twitter_api_secret": settings.get("twitter_api_secret"),
-                "twitter_access_token": settings.get("twitter_access_token"),
-                "twitter_access_token_secret": settings.get(
-                    "twitter_access_token_secret"
-                ),
-                "delete_tweets": settings.get("delete_tweets"),
-                "tweets_days_threshold": settings.get("tweets_days_threshold"),
-                "tweets_enable_retweet_threshold": settings.get(
-                    "tweets_enable_retweet_threshold"
-                ),
-                "tweets_retweet_threshold": settings.get("tweets_retweet_threshold"),
-                "tweets_enable_like_threshold": settings.get(
-                    "tweets_enable_like_threshold"
-                ),
-                "tweets_like_threshold": settings.get("tweets_like_threshold"),
-                "tweets_threads_threshold": settings.get("tweets_threads_threshold"),
-                "retweets_likes": settings.get("retweets_likes"),
-                "retweets_likes_delete_retweets": settings.get(
-                    "retweets_likes_delete_retweets"
-                ),
-                "retweets_likes_retweets_threshold": settings.get(
-                    "retweets_likes_retweets_threshold"
-                ),
-                "retweets_likes_delete_likes": settings.get(
-                    "retweets_likes_delete_likes"
-                ),
-                "retweets_likes_likes_threshold": settings.get(
-                    "retweets_likes_likes_threshold"
-                ),
-                "direct_messages": settings.get("direct_messages"),
-                "direct_messages_threshold": settings.get("direct_messages_threshold"),
+                "is_configured": True,
+                "settings": settings.get_all()
             }
         )
 

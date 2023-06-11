@@ -1,19 +1,15 @@
 <script setup>
-const props = defineProps({
-  userScreenName: String,
-  userProfileUrl: String,
-  isConfigured: Boolean
-})
+const props = defineProps({ settings: Object })
 </script>
 
 <template>
   <div>
-    <span class="logo">
-      <a href="/">
-        <img src="/images/logo-small.png" />
-      </a>
-    </span>
-    <template v-if="isConfigured">
+    <div>
+      <span class="logo">
+        <a href="/">
+          <img src="/images/logo-small.png" />
+        </a>
+      </span>
       <ul>
         <li>
           <router-link to="/">Dashboard</router-link>
@@ -32,13 +28,12 @@ const props = defineProps({
         </li>
       </ul>
       <span class="user">
-        <span>Configured for @{{ userScreenName }}</span>
-        <img v-if="userScreenName" :src="userProfileUrl" :title="`@${userScreenName}`" />
+        <span>Configured for @{{ settings.twitter_screen_name }}</span>
+        <img :src="settings.profile_image_url_https" :title="`@${settings.twitter_screen_name}`" />
       </span>
-    </template>
+    </div>
   </div>
 </template>
-
 <style scoped>
 span.logo img {
   vertical-align: middle;

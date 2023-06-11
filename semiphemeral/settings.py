@@ -38,6 +38,9 @@ class Settings(object):
     def set(self, key, val):
         self.settings[key] = val
 
+    def get_all(self):
+        return self.settings.copy()
+
     def load(self):
         if os.path.exists(self.filename):
             with open(self.filename, "r") as f:
@@ -52,7 +55,7 @@ class Settings(object):
     def save(self):
         with open(self.filename, "w") as f:
             os.chmod(self.filename, 0o0600)
-            json.dump(self.settings, f)
+            json.dump(self.settings, f, indent=2, sort_keys=True)
 
     def is_configured(self):
         if (

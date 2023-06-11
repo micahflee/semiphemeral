@@ -3,37 +3,29 @@ import { ref } from "vue"
 import NavBar from "./layout/NavBar.vue"
 import ConfigureWizard from "./pages/ConfigureWizard.vue"
 
-const userScreenName = ref("")
-const userProfileUrl = ref("")
 const isConfigured = ref(false)
+const settings = ref(null)
 
-fetch("/api/user")
+fetch("/api/settings")
   .then(function (response) {
     if (response.status !== 200) {
       console.log("Error fetching user, status code: " + response.status);
       return;
     }
     response.json().then(function (data) {
-      userScreenName.value = data["user_screen_name"]
-      userProfileUrl.value = data["user_profile_url"]
       isConfigured.value = data["is_configured"]
+      settings.value = data["settings"]
     });
   })
   .catch(function (err) {
-    console.log("Error fetching user", err)
+    console.log("Error fetching settings", err)
   });
 </script>
 
 <template>
   <div v-if="isConfigured">
-    <NavBar v-bind="{
-      userScreenName: userScreenName,
-      userProfileUrl: userProfileUrl,
-      isConfigured: isConfigured
-    }"></NavBar>
-    <router-view v-bind="{
-      userScreenName: userScreenName,
-    }"></router-view>
+    <NavBar v-bind="{ settings: settings }"></NavBar>
+    <router-view v-bind="{ settings: settings }"></router-view>
   </div>
   <div v-else>
     <ConfigureWizard></ConfigureWizard>

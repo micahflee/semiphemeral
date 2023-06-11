@@ -1,68 +1,29 @@
 <script setup>
 import { ref } from "vue"
 
-const props = defineProps({
-  userScreenName: String
-})
+const props = defineProps({ settings: Object })
 
 const loading = ref(false)
 const errorMessage = ref("")
-const hasFetched = ref(false)
-const twitterApiKey = ref(false)
-const twitterApiSecret = ref(false)
-const twitterAccessToken = ref(false)
-const twitterAccessTokenSecret = ref(false)
-const deleteTweets = ref(false)
-const tweetsDaysThreshold = ref(false)
-const tweetsEnableRetweetThreshold = ref(false)
-const tweetsRetweetThreshold = ref(false)
-const tweetsEnableLikeThreshold = ref(false)
-const tweetsLikeThreshold = ref(false)
-const tweetsThreadsThreshold = ref(false)
-const retweetsLikes = ref(false)
-const retweetsLikesDeleteRetweets = ref(false)
-const retweetsLikesRetweetsThreshold = ref(false)
-const retweetsLikesDeleteLikes = ref(false)
-const retweetsLikesLikesThreshold = ref(false)
-const directMessages = ref(false)
-const directMessagesThreshold = ref(false)
+const twitterApiKey = ref(props.settings.twitter_api_key)
+const twitterApiSecret = ref(props.settings.twitter_api_secret)
+const twitterAccessToken = ref(props.settings.twitter_access_token)
+const twitterAccessTokenSecret = ref(props.settings.twitter_access_token_secret)
+const deleteTweets = ref(props.settings.delete_tweets)
+const tweetsDaysThreshold = ref(props.settings.tweets_days_threshold)
+const tweetsEnableRetweetThreshold = ref(props.settings.tweets_enable_retweet_threshold)
+const tweetsRetweetThreshold = ref(props.settings.tweets_retweet_threshold)
+const tweetsEnableLikeThreshold = ref(props.settings.tweets_enable_like_threshold)
+const tweetsLikeThreshold = ref(props.settings.tweets_like_threshold)
+const tweetsThreadsThreshold = ref(props.settings.tweets_threads_threshold)
+const retweetsLikes = ref(props.settings.retweets_likes)
+const retweetsLikesDeleteRetweets = ref(props.settings.retweets_likes_delete_retweets)
+const retweetsLikesRetweetsThreshold = ref(props.settings.retweets_likes_retweets_threshold)
+const retweetsLikesDeleteLikes = ref(props.settings.retweets_likes_delete_likes)
+const retweetsLikesLikesThreshold = ref(props.settings.retweets_likes_likes_threshold)
+const directMessages = ref(props.settings.direct_messages)
+const directMessagesThreshold = ref(props.settings.direct_messages_threshold)
 const downloadAllTweets = ref(false)
-
-function getSettings() {
-  fetch("/api/settings")
-    .then(function (response) {
-      if (response.status !== 200) {
-        console.log(
-          "Error fetching settings, status code: " + response.status
-        );
-        return
-      }
-      response.json().then(function (data) {
-        hasFetched.value = data["has_fetched"]
-        twitterApiKey.value = data["twitter_api_key"]
-        twitterApiSecret.value = data["twitter_api_secret"]
-        twitterAccessToken.value = data["twitter_access_token"]
-        twitterAccessTokenSecret.value = data["twitter_access_token_secret"]
-        deleteTweets.value = data["delete_tweets"]
-        tweetsDaysThreshold.value = data["tweets_days_threshold"]
-        tweetsEnableRetweetThreshold.value = data["tweets_enable_retweet_threshold"]
-        tweetsRetweetThreshold.value = data["tweets_retweet_threshold"]
-        tweetsEnableLikeThreshold.value = data["tweets_enable_like_threshold"]
-        tweetsLikeThreshold.value = data["tweets_like_threshold"]
-        tweetsThreadsThreshold.value = data["tweets_threads_threshold"]
-        retweetsLikes.value = data["retweets_likes"]
-        retweetsLikesDeleteRetweets.value = data["retweets_likes_delete_retweets"]
-        retweetsLikesRetweetsThreshold.value = data["retweets_likes_retweets_threshold"]
-        retweetsLikesDeleteLikes.value = data["retweets_likes_delete_likes"]
-        retweetsLikesLikesThreshold.value = data["retweets_likes_likes_threshold"]
-        directMessages.value = data["direct_messages"]
-        directMessagesThreshold.value = data["direct_messages_threshold"]
-      });
-    })
-    .catch(function (err) {
-      console.log("Error fetching user", err)
-    })
-}
 
 function onSubmit() {
   loading.value = true
@@ -107,8 +68,6 @@ function onSubmit() {
       loading.value = false
     })
 }
-
-getSettings()
 </script>
 
 <template>
@@ -240,7 +199,7 @@ getSettings()
           </p>
         </fieldset>
 
-        <p v-if="hasFetched">
+        <p v-if="settings.since_id != null">
           <label>
             <input type="checkbox" v-model="downloadAllTweets" />
             Force Semiphemeral to download all of my tweets again next time, instead of just the newest ones
@@ -248,7 +207,7 @@ getSettings()
         </p>
 
         <p>
-          <input :disabled="loading" type="submit" value="Save" />
+          <button class="primary" :disabled="loading" type="submit">Save Settings</button>
         </p>
       </form>
     </template>

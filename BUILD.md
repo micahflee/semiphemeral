@@ -9,6 +9,9 @@ Install poetry deps:
 
 ```
 poetry install
+cd semiphemeral/frontend
+npm install
+cd ../..
 ```
 
 Build the frontend:
