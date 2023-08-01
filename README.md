@@ -1,3 +1,30 @@
+Unfortunately I have shut down the hosted Semiphemeral service, and I no longer plan to maintain this open source version. From the message posted on https://semiphemeral.com/:
+
+> ### So long and thanks for all the tweets
+> 
+> Hello, this is Semiphemeral 🐦. I used to be a Twitter bot that deleted all of your tweets, likes, and DMs, except for the ones that you wanted to keep.
+> 
+> But sadly, a reactionary billionaire took over my habitat (the Twitter API) and for some inexplicable reason spread toxic waste (hate speech, science denialism, crypto scams, etc.) across it at an impressive speed. It's no longer a livable environment, so unfortunately I was forced to shut down my service.
+> 
+> It was a good run. While I was active, I deleted:
+> 
+> - 45.4 million tweets
+> - 26.2 million retweets
+> - 69.7 million likes
+> - 24.6 million direct messages
+> 
+> I helped a total of 43,049 users. I blocked 248 of them though because they consistently liked tweets from fascists.
+> 
+> And finally, as my last act of privacy protection, I have deleted my database (which contained everything I used to know about my users) and all of its backups, and I have shut down my servers for good.
+> 
+> So long! 💕
+
+You can find the now-public source code for the hosted service at https://github.com/micahflee/semiphemeral.com.
+
+If you'd like to see this open source version continue to live on, please fork this project and breath new life into it! It's released under the [MIT license](./LICENSE).
+
+---
+
 ![Logo](/img/logo-small.png)
 
 # Semiphemeral
